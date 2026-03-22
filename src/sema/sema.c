@@ -336,6 +336,24 @@ static TypeKind check_call(Sema *s, Expr *e) {
     return set_expr_type(e, TYPE_BOOL);
   }
 
+  if (strcmp(e->as.call.name, "ends_with") == 0) {
+    if (e->as.call.arg_count != 2) {
+      sema_error(s, e->line, e->col, "ends_with expects 2 arguments, got %zu",
+                 e->as.call.arg_count);
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind a0 = check_expr(s, e->as.call.args[0]);
+    TypeKind a1 = check_expr(s, e->as.call.args[1]);
+    if (a0 == TYPE_VOID || a1 == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
+    if (!type_eq(a0, TYPE_STRING) || !type_eq(a1, TYPE_STRING)) {
+      sema_error(s, e->line, e->col,
+                 "ends_with expects (string, string), got ('%s', '%s')",
+                 type_kind_name(a0), type_kind_name(a1));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    return set_expr_type(e, TYPE_BOOL);
+  }
+
   if (strcmp(e->as.call.name, "to_lower") == 0) {
     if (e->as.call.arg_count != 1) {
       sema_error(s, e->line, e->col, "to_lower expects 1 argument, got %zu",
@@ -346,6 +364,36 @@ static TypeKind check_call(Sema *s, Expr *e) {
     if (at == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
     if (!type_eq(at, TYPE_STRING)) {
       sema_error(s, e->line, e->col, "to_lower expects string, got '%s'", type_kind_name(at));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    return set_expr_type(e, TYPE_STRING);
+  }
+
+  if (strcmp(e->as.call.name, "to_upper") == 0) {
+    if (e->as.call.arg_count != 1) {
+      sema_error(s, e->line, e->col, "to_upper expects 1 argument, got %zu",
+                 e->as.call.arg_count);
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind at = check_expr(s, e->as.call.args[0]);
+    if (at == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
+    if (!type_eq(at, TYPE_STRING)) {
+      sema_error(s, e->line, e->col, "to_upper expects string, got '%s'", type_kind_name(at));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    return set_expr_type(e, TYPE_STRING);
+  }
+
+  if (strcmp(e->as.call.name, "trim") == 0) {
+    if (e->as.call.arg_count != 1) {
+      sema_error(s, e->line, e->col, "trim expects 1 argument, got %zu",
+                 e->as.call.arg_count);
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind at = check_expr(s, e->as.call.args[0]);
+    if (at == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
+    if (!type_eq(at, TYPE_STRING)) {
+      sema_error(s, e->line, e->col, "trim expects string, got '%s'", type_kind_name(at));
       return set_expr_type(e, TYPE_VOID);
     }
     return set_expr_type(e, TYPE_STRING);

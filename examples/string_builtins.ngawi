@@ -1,8 +1,11 @@
 fn main() -> amba {
-  muwani s: imut = "NgawiLang";
-  muwani c: fuad = contains(s, "Lang");
-  muwani p: fuad = starts_with(s, "Nga");
-  muwani low: imut = to_lower(s);
-  print(c, p, low);
+  muwani s: imut = "  NgawiLang  ";
+  muwani t: imut = trim(s);
+  muwani c: fuad = contains(t, "awi");
+  muwani p: fuad = starts_with(t, "Nga");
+  muwani e: fuad = ends_with(t, "Lang");
+  muwani low: imut = to_lower(t);
+  muwani up: imut = to_upper(t);
+  print(c, p, e, low, up);
   return 0;
 }

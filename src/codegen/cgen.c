@@ -216,8 +216,28 @@ static void emit_expr(CGen *g, Expr *e) {
         emit(g, ")");
         break;
       }
+      if (strcmp(e->as.call.name, "ends_with") == 0 && e->as.call.arg_count == 2) {
+        emit(g, "ng_string_ends_with(");
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, ", ");
+        emit_expr(g, e->as.call.args[1]);
+        emit(g, ")");
+        break;
+      }
       if (strcmp(e->as.call.name, "to_lower") == 0 && e->as.call.arg_count == 1) {
         emit(g, "ng_string_to_lower(");
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, ")");
+        break;
+      }
+      if (strcmp(e->as.call.name, "to_upper") == 0 && e->as.call.arg_count == 1) {
+        emit(g, "ng_string_to_upper(");
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, ")");
+        break;
+      }
+      if (strcmp(e->as.call.name, "trim") == 0 && e->as.call.arg_count == 1) {
+        emit(g, "ng_string_trim(");
         emit_expr(g, e->as.call.args[0]);
         emit(g, ")");
         break;

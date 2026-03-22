@@ -275,11 +275,14 @@ static void test_len_builtin(void) {
 static void test_string_builtins(void) {
   const char *ok_src =
       "fn main() -> int {\n"
-      "  let s: string = \"NgawiLang\";\n"
-      "  let c: bool = contains(s, \"Lang\");\n"
-      "  let p: bool = starts_with(s, \"Nga\");\n"
-      "  let low: string = to_lower(s);\n"
-      "  print(c, p, low);\n"
+      "  let s: string = \"  NgawiLang  \";\n"
+      "  let t: string = trim(s);\n"
+      "  let c: bool = contains(t, \"awi\");\n"
+      "  let p: bool = starts_with(t, \"Nga\");\n"
+      "  let e: bool = ends_with(t, \"Lang\");\n"
+      "  let low: string = to_lower(t);\n"
+      "  let up: string = to_upper(t);\n"
+      "  print(c, p, e, low, up);\n"
       "  return 0;\n"
       "}\n";
 
@@ -287,6 +290,7 @@ static void test_string_builtins(void) {
       "fn main() -> int {\n"
       "  let x: int = 42;\n"
       "  let c = contains(x, \"a\");\n"
+      "  let u = to_upper(x);\n"
       "  return 0;\n"
       "}\n";
 

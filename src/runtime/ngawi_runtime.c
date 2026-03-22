@@ -100,6 +100,15 @@ int ng_string_starts_with(const char *s, const char *prefix) {
   return strncmp(str, pre, n) == 0;
 }
 
+int ng_string_ends_with(const char *s, const char *suffix) {
+  const char *str = s ? s : "";
+  const char *suf = suffix ? suffix : "";
+  size_t ls = strlen(str);
+  size_t le = strlen(suf);
+  if (le > ls) return 0;
+  return strcmp(str + (ls - le), suf) == 0;
+}
+
 const char *ng_string_to_lower(const char *s) {
   const char *src = s ? s : "";
   size_t n = strlen(src);
@@ -115,5 +124,44 @@ const char *ng_string_to_lower(const char *s) {
     }
   }
   out[n] = '\0';
+  return out;
+}
+
+const char *ng_string_to_upper(const char *s) {
+  const char *src = s ? s : "";
+  size_t n = strlen(src);
+  char *out = ng_runtime_string_alloc(n + 1);
+  if (!out) return "";
+
+  for (size_t i = 0; i < n; i++) {
+    unsigned char c = (unsigned char)src[i];
+    if (c >= 'a' && c <= 'z') {
+      out[i] = (char)(c - 'a' + 'A');
+    } else {
+      out[i] = (char)c;
+    }
+  }
+  out[n] = '\0';
+  return out;
+}
+
+static int ng_is_space(unsigned char c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
+}
+
+const char *ng_string_trim(const char *s) {
+  const char *src = s ? s : "";
+  size_t n = strlen(src);
+  size_t lo = 0;
+  while (lo < n && ng_is_space((unsigned char)src[lo])) lo++;
+
+  size_t hi = n;
+  while (hi > lo && ng_is_space((unsigned char)src[hi - 1])) hi--;
+
+  size_t out_n = hi - lo;
+  char *out = ng_runtime_string_alloc(out_n + 1);
+  if (!out) return "";
+  if (out_n > 0) memcpy(out, src + lo, out_n);
+  out[out_n] = '\0';
   return out;
 }
