@@ -130,6 +130,22 @@ static void test_elif_keyword(void) {
   }
 }
 
+static void test_import_keyword(void) {
+  const char *src = "import \"x.ngawi\";";
+  Lexer lx;
+  lexer_init(&lx, "import.ngawi", src);
+
+  Token t1 = lexer_next(&lx);
+  Token t2 = lexer_next(&lx);
+  Token t3 = lexer_next(&lx);
+  Token t4 = lexer_next(&lx);
+
+  expect_kind(t1, TOK_KW_IMPORT, "kw_import");
+  expect_kind(t2, TOK_STRING_LIT, "kw_import_string");
+  expect_kind(t3, TOK_SEMI, "kw_import_semi");
+  expect_kind(t4, TOK_EOF, "kw_import_eof");
+}
+
 static void test_match_tokens(void) {
   const char *src = "match x { 0 => { } _ => { } }";
   Lexer lx;
@@ -266,6 +282,7 @@ int main(void) {
   test_alias_type_keywords();
   test_alias_decl_keywords();
   test_elif_keyword();
+  test_import_keyword();
   test_match_tokens();
   test_loop_control_keywords();
   test_percent_token();

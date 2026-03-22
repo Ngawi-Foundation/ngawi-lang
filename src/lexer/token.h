@@ -13,6 +13,7 @@ typedef enum TokenKind {
   TOK_STRING_LIT,
 
   TOK_KW_FN,
+  TOK_KW_IMPORT,
   TOK_KW_RETURN,
   TOK_KW_LET,
   TOK_KW_CONST,

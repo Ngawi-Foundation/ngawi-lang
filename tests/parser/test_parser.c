@@ -254,6 +254,38 @@ static void test_parse_break_continue(void) {
   program_free(p);
 }
 
+static void test_parse_import_toplevel(void) {
+  const char *src =
+      "import \"lib.ngawi\";\n"
+      "fn main() -> int {\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program("import_top.ngawi", src, &had_error);
+  expect(had_error == 0, "top-level import parse should succeed");
+  expect(p != NULL, "program not null for import parse");
+  expect(p->import_count == 1, "one import expected");
+  expect(p->func_count == 1, "one function expected with import");
+  if (p && p->import_count == 1) {
+    expect(strcmp(p->imports[0].path, "lib.ngawi") == 0, "import path should be captured");
+  }
+  program_free(p);
+}
+
+static void test_parse_invalid_import_syntax(void) {
+  const char *src =
+      "import lib.ngawi;\n"
+      "fn main() -> int {\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program_maybe_quiet("import_bad.ngawi", src, &had_error, 1);
+  expect(had_error != 0, "invalid import syntax should fail parse");
+  program_free(p);
+}
+
 static void test_parse_recovery_keeps_following_functions(void) {
   const char *src =
       "fn broken() -> int {\n"
@@ -284,6 +316,8 @@ int main(void) {
   test_parse_match_string_stmt();
   test_parse_for_loop();
   test_parse_break_continue();
+  test_parse_import_toplevel();
+  test_parse_invalid_import_syntax();
   test_parse_recovery_keeps_following_functions();
 
   if (failures) {

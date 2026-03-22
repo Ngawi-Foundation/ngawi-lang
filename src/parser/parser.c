@@ -80,8 +80,8 @@ static void synchronize(Parser *p) {
       return;
     }
 
-    if (check(p, TOK_RBRACE) || check(p, TOK_KW_FN) || check(p, TOK_KW_LET) ||
-        check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_ELIF) ||
+    if (check(p, TOK_RBRACE) || check(p, TOK_KW_IMPORT) || check(p, TOK_KW_FN) ||
+        check(p, TOK_KW_LET) || check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_ELIF) ||
         check(p, TOK_KW_WHILE) || check(p, TOK_KW_FOR) || check(p, TOK_KW_MATCH) ||
         check(p, TOK_KW_BREAK) || check(p, TOK_KW_CONTINUE) || check(p, TOK_KW_RETURN)) {
       return;
@@ -721,14 +721,39 @@ static FunctionDecl parse_function(Parser *p) {
   return fn;
 }
 
+static ImportDecl parse_import_decl(Parser *p) {
+  Token kw = consume(p, TOK_KW_IMPORT, "expected 'import'");
+  Token path_tok = consume(p, TOK_STRING_LIT, "expected string path after import");
+  consume(p, TOK_SEMI, "expected ';' after import");
+
+  ImportDecl imp;
+  memset(&imp, 0, sizeof(imp));
+  imp.line = kw.line;
+  imp.col = kw.col;
+
+  size_t inner = path_tok.length >= 2 ? path_tok.length - 2 : 0;
+  imp.path = (char *)xcalloc(inner + 1, 1);
+  if (inner > 0) memcpy(imp.path, path_tok.start + 1, inner);
+  return imp;
+}
+
 Program *parse_program(const char *file, const char *source, int *had_error) {
   Parser p;
   parser_init(&p, file, source);
 
   Program *prog = (Program *)xcalloc(1, sizeof(Program));
   while (!check(&p, TOK_EOF) && !p.stop_parsing) {
+    if (check(&p, TOK_KW_IMPORT)) {
+      ImportDecl imp = parse_import_decl(&p);
+      prog->imports = (ImportDecl *)xrealloc(prog->imports, prog->import_count + 1,
+                                             sizeof(ImportDecl));
+      prog->imports[prog->import_count++] = imp;
+      if (p.panic_mode) synchronize(&p);
+      continue;
+    }
+
     if (!check(&p, TOK_KW_FN)) {
-      parse_error(&p, "expected top-level 'fn'");
+      parse_error(&p, "expected top-level 'import' or 'fn'");
       synchronize(&p);
       continue;
     }
@@ -819,6 +844,11 @@ static void stmt_free(Stmt *s) {
 
 void program_free(Program *p) {
   if (!p) return;
+  for (size_t i = 0; i < p->import_count; i++) {
+    free(p->imports[i].path);
+  }
+  free(p->imports);
+
   for (size_t i = 0; i < p->func_count; i++) {
     FunctionDecl *fn = &p->funcs[i];
     free(fn->name);

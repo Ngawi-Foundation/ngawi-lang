@@ -148,7 +148,15 @@ typedef struct FunctionDecl {
   Stmt *body;
 } FunctionDecl;
 
+typedef struct ImportDecl {
+  char *path;
+  int line;
+  int col;
+} ImportDecl;
+
 typedef struct Program {
+  ImportDecl *imports;
+  size_t import_count;
   FunctionDecl *funcs;
   size_t func_count;
 } Program;

@@ -173,79 +173,11 @@ static char *path_to_abs(const char *path) {
   return path_join(cwd, path);
 }
 
-typedef enum ImportParseResult {
-  IMPORT_PARSE_NONE = 0,
-  IMPORT_PARSE_OK = 1,
-  IMPORT_PARSE_INVALID = 2,
-} ImportParseResult;
-
 static int str_list_index_of(const StrList *list, const char *value) {
   for (size_t i = 0; i < list->count; i++) {
     if (strcmp(list->items[i], value) == 0) return (int)i;
   }
   return -1;
-}
-
-static int is_ident_char(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
-         c == '_';
-}
-
-static ImportParseResult parse_import_line(const char *line,
-                                           size_t len,
-                                           char **out_rel,
-                                           int *err_col) {
-  size_t i = 0;
-  while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
-
-  const char kw[] = "import";
-  size_t kw_len = sizeof(kw) - 1;
-  if (i + kw_len > len || strncmp(line + i, kw, kw_len) != 0) return IMPORT_PARSE_NONE;
-  if (i + kw_len < len && is_ident_char(line[i + kw_len])) return IMPORT_PARSE_NONE;
-
-  i += kw_len;
-  if (i >= len || (line[i] != ' ' && line[i] != '\t')) {
-    *err_col = (int)i + 1;
-    return IMPORT_PARSE_INVALID;
-  }
-
-  while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
-  if (i >= len || line[i] != '"') {
-    *err_col = (int)i + 1;
-    return IMPORT_PARSE_INVALID;
-  }
-  i++;
-
-  size_t start = i;
-  while (i < len && line[i] != '"') i++;
-  if (i >= len) {
-    *err_col = (int)start + 1;
-    return IMPORT_PARSE_INVALID;
-  }
-
-  size_t rel_len = i - start;
-  i++;
-
-  while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
-  if (i >= len || line[i] != ';') {
-    *err_col = (int)i + 1;
-    return IMPORT_PARSE_INVALID;
-  }
-  i++;
-
-  while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
-  if (i != len) {
-    *err_col = (int)i + 1;
-    return IMPORT_PARSE_INVALID;
-  }
-
-  *out_rel = dup_n(line + start, rel_len);
-  if (!*out_rel) {
-    *err_col = 1;
-    return IMPORT_PARSE_INVALID;
-  }
-
-  return IMPORT_PARSE_OK;
 }
 
 static void diag_import_context(const char *importer_file,
@@ -261,9 +193,7 @@ static void diag_import_cycle(const StrList *stack, size_t start_idx, const char
     if (i > start_idx && !str_buf_append_n(&chain, " -> ", 4)) break;
     if (!str_buf_append_n(&chain, stack->items[i], strlen(stack->items[i]))) break;
   }
-  if (chain.len > 0) {
-    str_buf_append_n(&chain, " -> ", 4);
-  }
+  if (chain.len > 0) str_buf_append_n(&chain, " -> ", 4);
   str_buf_append_n(&chain, repeat, strlen(repeat));
 
   diag_error(repeat, 1, 1, "import cycle detected: %s", chain.data ? chain.data : repeat);
@@ -312,115 +242,88 @@ static int load_module_recursive(const char *path,
     return 1;
   }
 
-  char *dir = path_dirname_dup(canon);
-  if (!dir) {
-    diag_error(canon, 1, 1, "out of memory");
+  int had_parse_error = 0;
+  Program *module_prog = parse_program(canon, source, &had_parse_error);
+  if (had_parse_error) {
+    program_free(module_prog);
     free(source);
     char *p = str_list_pop(stack);
     free(p);
     return 1;
   }
 
-  int line_no = 1;
-  const char *cur = source;
-  while (*cur) {
-    const char *line_start = cur;
-    while (*cur && *cur != '\n') cur++;
-    const char *line_end = cur;
-    int has_newline = (*cur == '\n');
-    if (has_newline) cur++;
+  char *dir = path_dirname_dup(canon);
+  if (!dir) {
+    diag_error(canon, 1, 1, "out of memory");
+    program_free(module_prog);
+    free(source);
+    char *p = str_list_pop(stack);
+    free(p);
+    return 1;
+  }
 
-    size_t line_len = (size_t)(line_end - line_start);
-    char *line = dup_n(line_start, line_len);
-    if (!line) {
+  for (size_t i = 0; i < module_prog->import_count; i++) {
+    ImportDecl *imp = &module_prog->imports[i];
+
+    char *dep_path = path_join(dir, imp->path);
+    if (!dep_path) {
+      diag_error(canon, imp->line, imp->col, "out of memory");
+      free(dir);
+      program_free(module_prog);
+      free(source);
+      char *p = str_list_pop(stack);
+      free(p);
+      return 1;
+    }
+
+    if (!has_ngawi_ext(dep_path)) {
+      diag_error_source(canon, source, imp->line, imp->col,
+                        "import path must end with .ngawi: %s", imp->path);
+      free(dep_path);
+      free(dir);
+      program_free(module_prog);
+      free(source);
+      char *p = str_list_pop(stack);
+      free(p);
+      return 1;
+    }
+
+    int rc = load_module_recursive(dep_path, stack, loaded, out_source, canon, imp->line,
+                                   imp->path);
+    free(dep_path);
+    if (rc != 0) {
+      free(dir);
+      program_free(module_prog);
+      free(source);
+      char *p = str_list_pop(stack);
+      free(p);
+      return 1;
+    }
+  }
+
+  if (!str_buf_append_n(out_source, source, strlen(source))) {
+    diag_error(canon, 1, 1, "out of memory");
+    free(dir);
+    program_free(module_prog);
+    free(source);
+    char *p = str_list_pop(stack);
+    free(p);
+    return 1;
+  }
+  if (out_source->len > 0 && out_source->data[out_source->len - 1] != '\n') {
+    if (!str_buf_append_n(out_source, "\n", 1)) {
       diag_error(canon, 1, 1, "out of memory");
       free(dir);
+      program_free(module_prog);
       free(source);
       char *p = str_list_pop(stack);
       free(p);
       return 1;
     }
-
-    char *rel = NULL;
-    int err_col = 1;
-    ImportParseResult parse_res = parse_import_line(line, line_len, &rel, &err_col);
-
-    if (parse_res == IMPORT_PARSE_INVALID) {
-      diag_error_source(canon, source, line_no, err_col,
-                        "invalid import syntax; expected: import \"file.ngawi\";");
-      free(line);
-      free(dir);
-      free(source);
-      char *p = str_list_pop(stack);
-      free(p);
-      return 1;
-    }
-
-    if (parse_res == IMPORT_PARSE_OK) {
-      char *dep_path = path_join(dir, rel);
-      if (!dep_path) {
-        free(rel);
-        free(line);
-        free(dir);
-        free(source);
-        diag_error(canon, 1, 1, "out of memory");
-        char *p = str_list_pop(stack);
-        free(p);
-        return 1;
-      }
-
-      if (!has_ngawi_ext(dep_path)) {
-        diag_error_source(canon, source, line_no, 1, "import path must end with .ngawi: %s",
-                          rel);
-        free(dep_path);
-        free(rel);
-        free(line);
-        free(dir);
-        free(source);
-        char *p = str_list_pop(stack);
-        free(p);
-        return 1;
-      }
-
-      int rc = load_module_recursive(dep_path, stack, loaded, out_source, canon, line_no, rel);
-      free(dep_path);
-      free(rel);
-      if (rc != 0) {
-        free(line);
-        free(dir);
-        free(source);
-        char *p = str_list_pop(stack);
-        free(p);
-        return 1;
-      }
-
-      if (has_newline && !str_buf_append_n(out_source, "\n", 1)) {
-        free(line);
-        free(dir);
-        free(source);
-        diag_error(canon, 1, 1, "out of memory");
-        char *p = str_list_pop(stack);
-        free(p);
-        return 1;
-      }
-    } else {
-      if (!str_buf_append_n(out_source, line_start, line_len) ||
-          (has_newline && !str_buf_append_n(out_source, "\n", 1))) {
-        free(line);
-        free(dir);
-        free(source);
-        diag_error(canon, 1, 1, "out of memory");
-        char *p = str_list_pop(stack);
-        free(p);
-        return 1;
-      }
-    }
-
-    free(line);
-    line_no++;
   }
 
   free(dir);
+  program_free(module_prog);
   free(source);
 
   char *done = str_list_pop(stack);
@@ -453,9 +356,7 @@ static char *load_source_with_imports(const char *input) {
     return NULL;
   }
 
-  if (!out.data) {
-    out.data = dup_n("", 0);
-  }
+  if (!out.data) out.data = dup_n("", 0);
   return out.data;
 }
 
