@@ -35,5 +35,6 @@ run_case examples/compound_assign.ngawi e2e_compound "0"
 run_case examples/incdec.ngawi e2e_incdec "4"
 run_case examples/len.ngawi e2e_len "5"
 run_case examples/string_concat.ngawi e2e_string_concat "ngawi"
+run_case examples/elif.ngawi e2e_elif "two"
 
 echo "All e2e tests passed"

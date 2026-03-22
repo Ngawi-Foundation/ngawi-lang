@@ -21,6 +21,7 @@ cases=(
   "incdec:examples/incdec.ngawi"
   "len:examples/len.ngawi"
   "string_concat:examples/string_concat.ngawi"
+  "elif:examples/elif.ngawi"
 )
 
 for entry in "${cases[@]}"; do

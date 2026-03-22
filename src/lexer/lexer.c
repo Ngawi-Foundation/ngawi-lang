@@ -68,6 +68,7 @@ static void skip_ws_and_comments(Lexer *lx) {
 static TokenKind keyword_kind(const char *s, size_t n) {
   if (n == 2 && strncmp(s, "fn", 2) == 0) return TOK_KW_FN;
   if (n == 2 && strncmp(s, "if", 2) == 0) return TOK_KW_IF;
+  if (n == 4 && strncmp(s, "elif", 4) == 0) return TOK_KW_ELIF;
   if (n == 3 && strncmp(s, "let", 3) == 0) return TOK_KW_LET;
   if (n == 6 && strncmp(s, "muwani", 6) == 0) return TOK_KW_LET;
   if (n == 4 && strncmp(s, "else", 4) == 0) return TOK_KW_ELSE;
@@ -229,6 +230,7 @@ const char *token_kind_name(TokenKind kind) {
     case TOK_KW_LET: return "KW_LET";
     case TOK_KW_CONST: return "KW_CONST";
     case TOK_KW_IF: return "KW_IF";
+    case TOK_KW_ELIF: return "KW_ELIF";
     case TOK_KW_ELSE: return "KW_ELSE";
     case TOK_KW_WHILE: return "KW_WHILE";
     case TOK_KW_FOR: return "KW_FOR";

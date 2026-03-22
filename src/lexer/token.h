@@ -17,6 +17,7 @@ typedef enum TokenKind {
   TOK_KW_LET,
   TOK_KW_CONST,
   TOK_KW_IF,
+  TOK_KW_ELIF,
   TOK_KW_ELSE,
   TOK_KW_WHILE,
   TOK_KW_FOR,

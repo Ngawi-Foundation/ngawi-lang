@@ -20,7 +20,7 @@ Core keywords:
 
 - `fn`
 - `return`
-- `if`, `else`
+- `if`, `elif`, `else`
 - `while`, `for`
 - `break`, `continue`
 - `let`, `const`
@@ -81,7 +81,7 @@ Supported statements:
 - compound assignment (`+=`, `-=`, `*=`, `/=`, `%=`)
 - expression statement
 - `return`
-- `if / else`
+- `if / elif / else`
 - `while`
 - `for`
 - `break`

@@ -112,6 +112,24 @@ static void test_alias_decl_keywords(void) {
   }
 }
 
+static void test_elif_keyword(void) {
+  const char *src = "if (true) { } elif (false) { } else { }";
+  Lexer lx;
+  lexer_init(&lx, "elif.ngawi", src);
+
+  Token t;
+  int seen_elif = 0;
+  do {
+    t = lexer_next(&lx);
+    if (t.kind == TOK_KW_ELIF) seen_elif = 1;
+  } while (t.kind != TOK_EOF);
+
+  if (!seen_elif) {
+    fprintf(stderr, "FAIL keyword token: elif not recognized\n");
+    failures++;
+  }
+}
+
 static void test_loop_control_keywords(void) {
   const char *src = "break; continue;";
   Lexer lx;
@@ -224,6 +242,7 @@ int main(void) {
   test_numbers_strings_comments();
   test_alias_type_keywords();
   test_alias_decl_keywords();
+  test_elif_keyword();
   test_loop_control_keywords();
   test_percent_token();
   test_compound_assign_tokens();

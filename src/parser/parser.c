@@ -81,9 +81,9 @@ static void synchronize(Parser *p) {
     }
 
     if (check(p, TOK_RBRACE) || check(p, TOK_KW_FN) || check(p, TOK_KW_LET) ||
-        check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_WHILE) ||
-        check(p, TOK_KW_FOR) || check(p, TOK_KW_BREAK) || check(p, TOK_KW_CONTINUE) ||
-        check(p, TOK_KW_RETURN)) {
+        check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_ELIF) ||
+        check(p, TOK_KW_WHILE) || check(p, TOK_KW_FOR) || check(p, TOK_KW_BREAK) ||
+        check(p, TOK_KW_CONTINUE) || check(p, TOK_KW_RETURN)) {
       return;
     }
 
@@ -424,14 +424,35 @@ static Stmt *parse_if(Parser *p) {
   Expr *cond = parse_expression(p);
   consume(p, TOK_RPAREN, "expected ')' after if condition");
   Stmt *then_branch = parse_statement(p);
-  Stmt *else_branch = NULL;
-  if (match(p, TOK_KW_ELSE)) else_branch = parse_statement(p);
 
-  Stmt *s = new_stmt(STMT_IF, kw.line, kw.col);
-  s->as.if_stmt.cond = cond;
-  s->as.if_stmt.then_branch = then_branch;
-  s->as.if_stmt.else_branch = else_branch;
-  return s;
+  Stmt *root = new_stmt(STMT_IF, kw.line, kw.col);
+  root->as.if_stmt.cond = cond;
+  root->as.if_stmt.then_branch = then_branch;
+  root->as.if_stmt.else_branch = NULL;
+
+  Stmt *cursor = root;
+  while (check(p, TOK_KW_ELIF)) {
+    Token elif_tok = p->cur;
+    advance(p);
+    consume(p, TOK_LPAREN, "expected '(' after elif");
+    Expr *elif_cond = parse_expression(p);
+    consume(p, TOK_RPAREN, "expected ')' after elif condition");
+    Stmt *elif_then = parse_statement(p);
+
+    Stmt *elif_node = new_stmt(STMT_IF, elif_tok.line, elif_tok.col);
+    elif_node->as.if_stmt.cond = elif_cond;
+    elif_node->as.if_stmt.then_branch = elif_then;
+    elif_node->as.if_stmt.else_branch = NULL;
+
+    cursor->as.if_stmt.else_branch = elif_node;
+    cursor = elif_node;
+  }
+
+  if (match(p, TOK_KW_ELSE)) {
+    cursor->as.if_stmt.else_branch = parse_statement(p);
+  }
+
+  return root;
 }
 
 static Stmt *parse_while(Parser *p) {
@@ -529,6 +550,11 @@ static Stmt *parse_for(Parser *p) {
 static Stmt *parse_statement(Parser *p) {
   if (check(p, TOK_LBRACE)) return parse_block(p);
   if (check(p, TOK_KW_IF)) return parse_if(p);
+  if (check(p, TOK_KW_ELIF)) {
+    parse_error(p, "unexpected 'elif' without preceding 'if'");
+    advance(p);
+    return new_stmt(STMT_BLOCK, p->cur.line, p->cur.col);
+  }
   if (check(p, TOK_KW_WHILE)) return parse_while(p);
   if (check(p, TOK_KW_FOR)) return parse_for(p);
 

@@ -1,0 +1,15 @@
+fn main() -> amba {
+  muwani x: amba = 2;
+
+  if (x == 0) {
+    print("zero");
+  } elif (x == 1) {
+    print("one");
+  } elif (x == 2) {
+    print("two");
+  } else {
+    print("other");
+  }
+
+  return 0;
+}

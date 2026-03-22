@@ -130,6 +130,30 @@ static void test_parse_incdec_stmt(void) {
   program_free(p);
 }
 
+static void test_parse_elif_chain(void) {
+  const char *src =
+      "fn main() -> int {\n"
+      "  let x: int = 2;\n"
+      "  if (x == 0) {\n"
+      "    print(\"zero\");\n"
+      "  } elif (x == 1) {\n"
+      "    print(\"one\");\n"
+      "  } elif (x == 2) {\n"
+      "    print(\"two\");\n"
+      "  } else {\n"
+      "    print(\"other\");\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program("elif.ngawi", src, &had_error);
+  expect(had_error == 0, "elif parse should succeed");
+  expect(p != NULL, "elif program not null");
+  expect(p->func_count == 1, "elif one function expected");
+  program_free(p);
+}
+
 static void test_parse_for_loop(void) {
   const char *src =
       "fn main() -> int {\n"
@@ -189,6 +213,7 @@ int main(void) {
   test_parse_modulo_expr();
   test_parse_compound_assign();
   test_parse_incdec_stmt();
+  test_parse_elif_chain();
   test_parse_for_loop();
   test_parse_break_continue();
   test_parse_recovery_keeps_following_functions();

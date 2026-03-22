@@ -26,13 +26,15 @@ crot name: imut = "ngawi";
 
 ## Control flow
 
-### if / else
+### if / elif / else
 
 ```ngawi
 if (x > 0) {
   print("positive");
+} elif (x == 0) {
+  print("zero");
 } else {
-  print("non-positive");
+  print("negative");
 }
 ```
 
