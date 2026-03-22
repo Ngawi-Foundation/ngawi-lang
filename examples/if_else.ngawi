@@ -1,6 +1,6 @@
 fn main() -> amba {
-  let score: rusdi = 7.0;
-  let ok: fuad = score > 5.0;
+  muwani score: rusdi = 7.0;
+  muwani ok: fuad = score > 5.0;
   if (ok) {
     print("big");
   } else {

@@ -185,7 +185,7 @@ static void emit_stmt(CGen *g, Stmt *st) {
     case STMT_VAR_DECL:
     case STMT_CONST_DECL:
       emit_indent(g);
-      if (st->kind == STMT_CONST_DECL) emit(g, "const ");
+      if (st->kind == STMT_CONST_DECL && st->as.var_decl.type != TYPE_STRING) emit(g, "const ");
       emit(g, c_type(st->as.var_decl.type));
       emit(g, " ");
       emit(g, st->as.var_decl.name);

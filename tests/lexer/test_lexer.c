@@ -88,6 +88,30 @@ static void test_alias_type_keywords(void) {
   }
 }
 
+static void test_alias_decl_keywords(void) {
+  const char *src = "muwani a: amba = 1; crot b: amba = 2;";
+  Lexer lx;
+  lexer_init(&lx, "alias_decl.ngawi", src);
+
+  Token t;
+  int let_count = 0;
+  int const_count = 0;
+  do {
+    t = lexer_next(&lx);
+    if (t.kind == TOK_KW_LET) let_count++;
+    if (t.kind == TOK_KW_CONST) const_count++;
+  } while (t.kind != TOK_EOF);
+
+  if (let_count == 0) {
+    fprintf(stderr, "FAIL alias keyword: muwani not recognized as let\n");
+    failures++;
+  }
+  if (const_count == 0) {
+    fprintf(stderr, "FAIL alias keyword: crot not recognized as const\n");
+    failures++;
+  }
+}
+
 static void test_invalid_token(void) {
   const char *src = "let x = @;";
   Lexer lx;
@@ -105,6 +129,7 @@ int main(void) {
   test_keywords_and_symbols();
   test_numbers_strings_comments();
   test_alias_type_keywords();
+  test_alias_decl_keywords();
   test_invalid_token();
 
   if (failures > 0) {

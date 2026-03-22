@@ -6,8 +6,8 @@ fn fact(n: amba) -> amba {
 }
 
 fn main() -> amba {
-  let x: amba = 5;
-  let y = fact(x);
+  muwani x: amba = 5;
+  muwani y = fact(x);
   print("fact", x, "=", y);
   return 0;
 }

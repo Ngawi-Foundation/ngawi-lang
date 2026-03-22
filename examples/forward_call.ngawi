@@ -1,5 +1,5 @@
 fn main() -> amba {
-  let v: amba = twice(21);
+  muwani v: amba = twice(21);
   print(v);
   return 0;
 }

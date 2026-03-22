@@ -1,5 +1,5 @@
 fn main() -> amba {
-  let msg: imut = "Hello, Ngawi";
+  crot msg: imut = "Hello, Ngawi";
   print(msg);
   return 0;
 }

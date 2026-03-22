@@ -69,12 +69,14 @@ static TokenKind keyword_kind(const char *s, size_t n) {
   if (n == 2 && strncmp(s, "fn", 2) == 0) return TOK_KW_FN;
   if (n == 2 && strncmp(s, "if", 2) == 0) return TOK_KW_IF;
   if (n == 3 && strncmp(s, "let", 3) == 0) return TOK_KW_LET;
+  if (n == 6 && strncmp(s, "muwani", 6) == 0) return TOK_KW_LET;
   if (n == 4 && strncmp(s, "else", 4) == 0) return TOK_KW_ELSE;
   if (n == 4 && strncmp(s, "true", 4) == 0) return TOK_KW_TRUE;
   if (n == 4 && strncmp(s, "void", 4) == 0) return TOK_KW_VOID;
   if (n == 3 && strncmp(s, "int", 3) == 0) return TOK_KW_INT;
   if (n == 4 && strncmp(s, "amba", 4) == 0) return TOK_KW_AMBA;
   if (n == 5 && strncmp(s, "const", 5) == 0) return TOK_KW_CONST;
+  if (n == 4 && strncmp(s, "crot", 4) == 0) return TOK_KW_CONST;
   if (n == 5 && strncmp(s, "while", 5) == 0) return TOK_KW_WHILE;
   if (n == 5 && strncmp(s, "false", 5) == 0) return TOK_KW_FALSE;
   if (n == 5 && strncmp(s, "float", 5) == 0) return TOK_KW_FLOAT;

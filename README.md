@@ -59,15 +59,22 @@ Update golden snapshots after codegen changes:
 make update_golden
 ```
 
-## Type Aliases
+## Aliases
 
-Ngawi supports base type names and aliases.
+Ngawi supports base names and aliases.
+
+Type aliases:
 
 - `int` or `amba`
 - `float` or `rusdi`
 - `bool` or `fuad`
 - `string` or `imut`
 - `void`
+
+Declaration aliases:
+
+- `let` or `muwani`
+- `const` or `crot`
 
 ## Example
 
@@ -80,10 +87,10 @@ fn fact(n: amba) -> amba {
 }
 
 fn main() -> amba {
-  let value: amba = fact(5);
-  let label: imut = "fact";
-  let ok: fuad = true;
-  let scale: rusdi = 1.0;
+  muwani value: amba = fact(5);
+  crot label: imut = "fact";
+  muwani ok: fuad = true;
+  muwani scale: rusdi = 1.0;
   print(label, 5, "=", value, ok, scale);
   return 0;
 }
