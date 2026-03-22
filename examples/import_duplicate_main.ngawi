@@ -1,0 +1,7 @@
+import "imports/use_shared_a.ngawi";
+import "imports/use_shared_b.ngawi";
+
+fn main() -> amba {
+  print(from_a() + from_b());
+  return 0;
+}

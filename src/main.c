@@ -173,46 +173,114 @@ static char *path_to_abs(const char *path) {
   return path_join(cwd, path);
 }
 
-static int parse_import_line(const char *line, size_t len, char **out_rel) {
+typedef enum ImportParseResult {
+  IMPORT_PARSE_NONE = 0,
+  IMPORT_PARSE_OK = 1,
+  IMPORT_PARSE_INVALID = 2,
+} ImportParseResult;
+
+static int str_list_index_of(const StrList *list, const char *value) {
+  for (size_t i = 0; i < list->count; i++) {
+    if (strcmp(list->items[i], value) == 0) return (int)i;
+  }
+  return -1;
+}
+
+static int is_ident_char(char c) {
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+         c == '_';
+}
+
+static ImportParseResult parse_import_line(const char *line,
+                                           size_t len,
+                                           char **out_rel,
+                                           int *err_col) {
   size_t i = 0;
   while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
 
   const char kw[] = "import";
   size_t kw_len = sizeof(kw) - 1;
-  if (i + kw_len > len || strncmp(line + i, kw, kw_len) != 0) return 0;
+  if (i + kw_len > len || strncmp(line + i, kw, kw_len) != 0) return IMPORT_PARSE_NONE;
+  if (i + kw_len < len && is_ident_char(line[i + kw_len])) return IMPORT_PARSE_NONE;
+
   i += kw_len;
+  if (i >= len || (line[i] != ' ' && line[i] != '\t')) {
+    *err_col = (int)i + 1;
+    return IMPORT_PARSE_INVALID;
+  }
 
-  if (i < len && line[i] != ' ' && line[i] != '\t') return 0;
   while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
-
-  if (i >= len || line[i] != '"') return 0;
+  if (i >= len || line[i] != '"') {
+    *err_col = (int)i + 1;
+    return IMPORT_PARSE_INVALID;
+  }
   i++;
 
   size_t start = i;
   while (i < len && line[i] != '"') i++;
-  if (i >= len) return 0;
+  if (i >= len) {
+    *err_col = (int)start + 1;
+    return IMPORT_PARSE_INVALID;
+  }
 
   size_t rel_len = i - start;
-  i++;  // closing quote
+  i++;
 
   while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
-  if (i >= len || line[i] != ';') return 0;
+  if (i >= len || line[i] != ';') {
+    *err_col = (int)i + 1;
+    return IMPORT_PARSE_INVALID;
+  }
   i++;
 
   while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
-  if (i != len) return 0;
+  if (i != len) {
+    *err_col = (int)i + 1;
+    return IMPORT_PARSE_INVALID;
+  }
 
   *out_rel = dup_n(line + start, rel_len);
-  return *out_rel != NULL;
+  if (!*out_rel) {
+    *err_col = 1;
+    return IMPORT_PARSE_INVALID;
+  }
+
+  return IMPORT_PARSE_OK;
+}
+
+static void diag_import_context(const char *importer_file,
+                                int importer_line,
+                                const char *target_text) {
+  if (!importer_file || !target_text) return;
+  diag_note(importer_file, importer_line, 1, "while importing \"%s\"", target_text);
+}
+
+static void diag_import_cycle(const StrList *stack, size_t start_idx, const char *repeat) {
+  StrBuf chain = {0};
+  for (size_t i = start_idx; i < stack->count; i++) {
+    if (i > start_idx && !str_buf_append_n(&chain, " -> ", 4)) break;
+    if (!str_buf_append_n(&chain, stack->items[i], strlen(stack->items[i]))) break;
+  }
+  if (chain.len > 0) {
+    str_buf_append_n(&chain, " -> ", 4);
+  }
+  str_buf_append_n(&chain, repeat, strlen(repeat));
+
+  diag_error(repeat, 1, 1, "import cycle detected: %s", chain.data ? chain.data : repeat);
+  free(chain.data);
 }
 
 static int load_module_recursive(const char *path,
                                  StrList *stack,
                                  StrList *loaded,
-                                 StrBuf *out_source) {
+                                 StrBuf *out_source,
+                                 const char *importer_file,
+                                 int importer_line,
+                                 const char *target_text) {
   char *canon = path_to_abs(path);
   if (!canon) {
     diag_error(path, 1, 1, "cannot resolve module path: %s", strerror(errno));
+    diag_import_context(importer_file, importer_line, target_text);
     return 1;
   }
 
@@ -221,8 +289,10 @@ static int load_module_recursive(const char *path,
     return 0;
   }
 
-  if (str_list_contains(stack, canon)) {
-    diag_error(canon, 1, 1, "import cycle detected");
+  int cycle_idx = str_list_index_of(stack, canon);
+  if (cycle_idx >= 0) {
+    diag_import_cycle(stack, (size_t)cycle_idx, canon);
+    diag_import_context(importer_file, importer_line, target_text);
     free(canon);
     return 1;
   }
@@ -236,6 +306,7 @@ static int load_module_recursive(const char *path,
   char *source = read_file_all(canon);
   if (!source) {
     diag_error(canon, 1, 1, "cannot read module: %s", strerror(errno));
+    diag_import_context(importer_file, importer_line, target_text);
     char *p = str_list_pop(stack);
     free(p);
     return 1;
@@ -250,6 +321,7 @@ static int load_module_recursive(const char *path,
     return 1;
   }
 
+  int line_no = 1;
   const char *cur = source;
   while (*cur) {
     const char *line_start = cur;
@@ -270,12 +342,24 @@ static int load_module_recursive(const char *path,
     }
 
     char *rel = NULL;
-    int is_import = parse_import_line(line, line_len, &rel);
+    int err_col = 1;
+    ImportParseResult parse_res = parse_import_line(line, line_len, &rel, &err_col);
 
-    if (is_import) {
+    if (parse_res == IMPORT_PARSE_INVALID) {
+      diag_error_source(canon, source, line_no, err_col,
+                        "invalid import syntax; expected: import \"file.ngawi\";");
+      free(line);
+      free(dir);
+      free(source);
+      char *p = str_list_pop(stack);
+      free(p);
+      return 1;
+    }
+
+    if (parse_res == IMPORT_PARSE_OK) {
       char *dep_path = path_join(dir, rel);
-      free(rel);
       if (!dep_path) {
+        free(rel);
         free(line);
         free(dir);
         free(source);
@@ -286,8 +370,10 @@ static int load_module_recursive(const char *path,
       }
 
       if (!has_ngawi_ext(dep_path)) {
-        diag_error(canon, 1, 1, "import path must end with .ngawi: %s", dep_path);
+        diag_error_source(canon, source, line_no, 1, "import path must end with .ngawi: %s",
+                          rel);
         free(dep_path);
+        free(rel);
         free(line);
         free(dir);
         free(source);
@@ -296,8 +382,9 @@ static int load_module_recursive(const char *path,
         return 1;
       }
 
-      int rc = load_module_recursive(dep_path, stack, loaded, out_source);
+      int rc = load_module_recursive(dep_path, stack, loaded, out_source, canon, line_no, rel);
       free(dep_path);
+      free(rel);
       if (rc != 0) {
         free(line);
         free(dir);
@@ -330,6 +417,7 @@ static int load_module_recursive(const char *path,
     }
 
     free(line);
+    line_no++;
   }
 
   free(dir);
@@ -350,7 +438,7 @@ static char *load_source_with_imports(const char *input) {
   StrList loaded = {0};
   StrBuf out = {0};
 
-  int rc = load_module_recursive(input, &stack, &loaded, &out);
+  int rc = load_module_recursive(input, &stack, &loaded, &out, NULL, 0, NULL);
 
   while (stack.count > 0) {
     char *s = str_list_pop(&stack);

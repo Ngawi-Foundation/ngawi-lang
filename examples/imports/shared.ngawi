@@ -1,0 +1,3 @@
+fn shared_val() -> amba {
+  return 9;
+}

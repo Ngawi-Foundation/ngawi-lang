@@ -1,0 +1,5 @@
+import "cycle_c.ngawi";
+
+fn cycle_b() -> amba {
+  return cycle_a();
+}

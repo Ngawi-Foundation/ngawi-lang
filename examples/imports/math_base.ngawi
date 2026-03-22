@@ -1,0 +1,3 @@
+fn inc(x: amba) -> amba {
+  return x + 1;
+}

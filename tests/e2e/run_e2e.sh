@@ -21,6 +21,20 @@ run_case() {
   rm -f "$bin" "$bin.c"
 }
 
+run_fail_case() {
+  local src="$1"
+  local bin="$2"
+
+  if ./ngawic build "$src" -o "$bin" >/dev/null 2>/dev/null; then
+    echo "E2E FAIL: $src"
+    echo "  expected build failure but build succeeded"
+    rm -f "$bin" "$bin.c"
+    return 1
+  fi
+
+  rm -f "$bin" "$bin.c"
+}
+
 run_case examples/hello.ngawi e2e_hello "Hello, Ngawi"
 run_case examples/factorial.ngawi e2e_factorial "fact 5 = 120"
 run_case examples/if_else.ngawi e2e_if_else "big"
@@ -39,5 +53,10 @@ run_case examples/elif.ngawi e2e_elif "two"
 run_case examples/match.ngawi e2e_match "two"
 run_case examples/string_builtins.ngawi e2e_string_builtins "true true ngawilang"
 run_case examples/import_main.ngawi e2e_import "7"
+run_case examples/import_nested_main.ngawi e2e_import_nested "7"
+run_case examples/import_duplicate_main.ngawi e2e_import_dup "18"
+run_fail_case examples/import_cycle_main.ngawi e2e_import_cycle
+run_fail_case examples/import_missing_main.ngawi e2e_import_missing
+run_fail_case examples/import_bad_syntax_main.ngawi e2e_import_bad_syntax
 
 echo "All e2e tests passed"

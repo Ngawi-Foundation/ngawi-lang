@@ -1,0 +1,5 @@
+import "imports/does_not_exist.ngawi";
+
+fn main() -> amba {
+  return 0;
+}

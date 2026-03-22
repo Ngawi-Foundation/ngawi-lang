@@ -1,0 +1,5 @@
+import "shared.ngawi";
+
+fn from_b() -> amba {
+  return shared_val();
+}

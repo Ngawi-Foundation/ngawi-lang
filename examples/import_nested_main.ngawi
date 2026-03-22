@@ -1,0 +1,6 @@
+import "imports/math_mid.ngawi";
+
+fn main() -> amba {
+  print(add2(5));
+  return 0;
+}

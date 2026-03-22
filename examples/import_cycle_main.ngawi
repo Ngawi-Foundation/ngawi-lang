@@ -1,0 +1,6 @@
+import "imports/cycle_a.ngawi";
+
+fn main() -> amba {
+  print(cycle_a());
+  return 0;
+}

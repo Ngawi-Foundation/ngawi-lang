@@ -1,0 +1,5 @@
+import imports/math_base.ngawi;
+
+fn main() -> amba {
+  return 0;
+}
