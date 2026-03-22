@@ -37,7 +37,7 @@ Ngawi compiles source code to native binaries through C11.
 
 - `src/runtime/*`
   - print helpers
-  - string helpers (`eq`, `len`, `concat`, `contains`, `starts_with`, `to_lower`)
+  - string helpers (`eq`, `len`, `concat`, `contains`, `starts_with`, `ends_with`, `to_lower`, `to_upper`, `trim`)
 
 Current string allocation model:
 

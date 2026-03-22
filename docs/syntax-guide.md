@@ -142,7 +142,10 @@ let s: string = "NgawiLang";
 let n: int = len(s);
 let c: bool = contains(s, "Lang");
 let p: bool = starts_with(s, "Nga");
+let e: bool = ends_with(s, "Lang");
 let low: string = to_lower(s);
+let up: string = to_upper(s);
+let t: string = trim("  ngawi  ");
 ```
 
 ## Type aliases

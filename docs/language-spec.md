@@ -198,7 +198,10 @@ Rules:
 - `len(s) -> int`
 - `contains(s, sub) -> bool`
 - `starts_with(s, prefix) -> bool`
+- `ends_with(s, suffix) -> bool`
 - `to_lower(s) -> string`
+- `to_upper(s) -> string`
+- `trim(s) -> string`
 
 All string helper arguments must be `string`.
 

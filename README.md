@@ -13,7 +13,7 @@ Current language surface:
 
 - control flow: `if/elif/else`, `while`, `for`, `match` (int+bool+string MVP), `break`, `continue`
 - operators: arithmetic, comparison, logical, compound assignment, postfix `++`/`--`
-- strings: equality by value, concatenation with `+`, `len`, `contains`, `starts_with`, `to_lower`
+- strings: equality by value, concatenation with `+`, `len`, `contains`, `starts_with`, `ends_with`, `to_lower`, `to_upper`, `trim`
 - modules: top-level `import "file.ngawi";` with cycle detection
 
 Compiler pipeline in this repository:
