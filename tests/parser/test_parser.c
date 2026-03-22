@@ -38,6 +38,23 @@ static void test_parse_error(void) {
   program_free(p);
 }
 
+static void test_parse_for_loop(void) {
+  const char *src =
+      "fn main() -> int {\n"
+      "  for (let i: int = 1; i <= 3; i = i + 1) {\n"
+      "    print(i);\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program("for.ngawi", src, &had_error);
+  expect(had_error == 0, "for loop parse should succeed");
+  expect(p != NULL, "for loop program not null");
+  expect(p->func_count == 1, "for loop one function expected");
+  program_free(p);
+}
+
 static void test_parse_recovery_keeps_following_functions(void) {
   const char *src =
       "fn broken() -> int {\n"
@@ -59,6 +76,7 @@ static void test_parse_recovery_keeps_following_functions(void) {
 int main(void) {
   test_parse_main();
   test_parse_error();
+  test_parse_for_loop();
   test_parse_recovery_keeps_following_functions();
 
   if (failures) {

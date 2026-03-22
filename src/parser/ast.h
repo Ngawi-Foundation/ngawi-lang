@@ -63,6 +63,7 @@ typedef enum StmtKind {
   STMT_RETURN,
   STMT_IF,
   STMT_WHILE,
+  STMT_FOR,
 } StmtKind;
 
 struct Stmt {
@@ -100,6 +101,12 @@ struct Stmt {
       Expr *cond;
       Stmt *body;
     } while_stmt;
+    struct {
+      Stmt *init;
+      Expr *cond;
+      Stmt *update;
+      Stmt *body;
+    } for_stmt;
   } as;
 };
 

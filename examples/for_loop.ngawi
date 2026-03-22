@@ -1,0 +1,8 @@
+fn main() -> amba {
+  muwani sum: amba = 0;
+  for (muwani i: amba = 1; i <= 3; i = i + 1) {
+    sum = sum + i;
+  }
+  print(sum);
+  return 0;
+}

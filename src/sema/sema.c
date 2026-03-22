@@ -502,6 +502,26 @@ static void check_stmt(Sema *s, Stmt *st) {
       check_stmt(s, st->as.while_stmt.body);
       break;
     }
+
+    case STMT_FOR: {
+      push_scope(s);
+
+      if (st->as.for_stmt.init) check_stmt(s, st->as.for_stmt.init);
+
+      if (st->as.for_stmt.cond) {
+        TypeKind ct = check_expr(s, st->as.for_stmt.cond);
+        if (ct != TYPE_VOID && !type_eq(ct, TYPE_BOOL)) {
+          sema_error(s, st->line, st->col, "for condition must be bool, got '%s'",
+                     type_kind_name(ct));
+        }
+      }
+
+      if (st->as.for_stmt.update) check_stmt(s, st->as.for_stmt.update);
+      check_stmt(s, st->as.for_stmt.body);
+
+      pop_scope(s);
+      break;
+    }
   }
 }
 

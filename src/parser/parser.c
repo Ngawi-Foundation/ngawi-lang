@@ -82,7 +82,7 @@ static void synchronize(Parser *p) {
 
     if (check(p, TOK_RBRACE) || check(p, TOK_KW_FN) || check(p, TOK_KW_LET) ||
         check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_WHILE) ||
-        check(p, TOK_KW_RETURN)) {
+        check(p, TOK_KW_FOR) || check(p, TOK_KW_RETURN)) {
       return;
     }
 
@@ -372,10 +372,91 @@ static Stmt *parse_while(Parser *p) {
   return s;
 }
 
+static Stmt *parse_for_clause_stmt(Parser *p, int with_semicolon) {
+  if (check(p, TOK_KW_LET) || check(p, TOK_KW_CONST)) {
+    int is_const = check(p, TOK_KW_CONST);
+    Token kw = p->cur;
+    advance(p);
+    Token name = consume(p, TOK_IDENT, "expected identifier");
+
+    int has_type = 0;
+    TypeKind type = TYPE_VOID;
+    if (match(p, TOK_COLON)) {
+      has_type = 1;
+      type = parse_type(p);
+    }
+
+    consume(p, TOK_ASSIGN, "expected '=' in declaration");
+    Expr *init = parse_expression(p);
+    if (with_semicolon) consume(p, TOK_SEMI, "expected ';' after declaration");
+
+    Stmt *s = new_stmt(is_const ? STMT_CONST_DECL : STMT_VAR_DECL, kw.line, kw.col);
+    s->as.var_decl.name = dup_lexeme(&name);
+    s->as.var_decl.has_type = has_type;
+    s->as.var_decl.type = type;
+    s->as.var_decl.init = init;
+    return s;
+  }
+
+  if (check(p, TOK_IDENT) && p->next.kind == TOK_ASSIGN) {
+    Token name = p->cur;
+    advance(p);
+    consume(p, TOK_ASSIGN, "expected '='");
+    Expr *rhs = parse_expression(p);
+    if (with_semicolon) consume(p, TOK_SEMI, "expected ';' after assignment");
+
+    Stmt *s = new_stmt(STMT_ASSIGN, name.line, name.col);
+    s->as.assign.name = dup_lexeme(&name);
+    s->as.assign.value = rhs;
+    return s;
+  }
+
+  Token t = p->cur;
+  Expr *e = parse_expression(p);
+  if (with_semicolon) consume(p, TOK_SEMI, "expected ';' after expression");
+  Stmt *s = new_stmt(STMT_EXPR, t.line, t.col);
+  s->as.expr_stmt.expr = e;
+  return s;
+}
+
+static Stmt *parse_for(Parser *p) {
+  Token kw = consume(p, TOK_KW_FOR, "expected 'for'");
+  consume(p, TOK_LPAREN, "expected '(' after for");
+
+  Stmt *init = NULL;
+  if (!check(p, TOK_SEMI)) {
+    init = parse_for_clause_stmt(p, 1);
+  } else {
+    consume(p, TOK_SEMI, "expected ';' after for initializer");
+  }
+
+  Expr *cond = NULL;
+  if (!check(p, TOK_SEMI)) {
+    cond = parse_expression(p);
+  }
+  consume(p, TOK_SEMI, "expected ';' after for condition");
+
+  Stmt *update = NULL;
+  if (!check(p, TOK_RPAREN)) {
+    update = parse_for_clause_stmt(p, 0);
+  }
+
+  consume(p, TOK_RPAREN, "expected ')' after for clauses");
+  Stmt *body = parse_statement(p);
+
+  Stmt *s = new_stmt(STMT_FOR, kw.line, kw.col);
+  s->as.for_stmt.init = init;
+  s->as.for_stmt.cond = cond;
+  s->as.for_stmt.update = update;
+  s->as.for_stmt.body = body;
+  return s;
+}
+
 static Stmt *parse_statement(Parser *p) {
   if (check(p, TOK_LBRACE)) return parse_block(p);
   if (check(p, TOK_KW_IF)) return parse_if(p);
   if (check(p, TOK_KW_WHILE)) return parse_while(p);
+  if (check(p, TOK_KW_FOR)) return parse_for(p);
 
   if (check(p, TOK_KW_LET) || check(p, TOK_KW_CONST)) {
     int is_const = check(p, TOK_KW_CONST);
@@ -540,6 +621,12 @@ static void stmt_free(Stmt *s) {
     case STMT_WHILE:
       expr_free(s->as.while_stmt.cond);
       stmt_free(s->as.while_stmt.body);
+      break;
+    case STMT_FOR:
+      stmt_free(s->as.for_stmt.init);
+      expr_free(s->as.for_stmt.cond);
+      stmt_free(s->as.for_stmt.update);
+      stmt_free(s->as.for_stmt.body);
       break;
   }
   free(s);

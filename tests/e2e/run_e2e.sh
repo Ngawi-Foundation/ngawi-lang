@@ -26,5 +26,6 @@ run_case examples/factorial.ngawi e2e_factorial "fact 5 = 120"
 run_case examples/if_else.ngawi e2e_if_else "big"
 run_case examples/while.ngawi e2e_while $'1\n2\n3'
 run_case examples/forward_call.ngawi e2e_forward "42"
+run_case examples/for_loop.ngawi e2e_for "6"
 
 echo "All e2e tests passed"

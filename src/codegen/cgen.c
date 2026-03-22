@@ -176,6 +176,35 @@ static void emit_block(CGen *g, Stmt *blk) {
   emit(g, "}\n");
 }
 
+static void emit_for_clause_stmt(CGen *g, Stmt *st) {
+  if (!st) return;
+
+  switch (st->kind) {
+    case STMT_VAR_DECL:
+    case STMT_CONST_DECL:
+      if (st->kind == STMT_CONST_DECL && st->as.var_decl.type != TYPE_STRING) emit(g, "const ");
+      emit(g, c_type(st->as.var_decl.type));
+      emit(g, " ");
+      emit(g, st->as.var_decl.name);
+      emit(g, " = ");
+      emit_expr(g, st->as.var_decl.init);
+      break;
+
+    case STMT_ASSIGN:
+      emit(g, st->as.assign.name);
+      emit(g, " = ");
+      emit_expr(g, st->as.assign.value);
+      break;
+
+    case STMT_EXPR:
+      emit_expr(g, st->as.expr_stmt.expr);
+      break;
+
+    default:
+      break;
+  }
+}
+
 static void emit_stmt(CGen *g, Stmt *st) {
   switch (st->kind) {
     case STMT_BLOCK:
@@ -241,6 +270,18 @@ static void emit_stmt(CGen *g, Stmt *st) {
       emit_expr(g, st->as.while_stmt.cond);
       emit(g, ")\n");
       emit_stmt(g, st->as.while_stmt.body);
+      break;
+
+    case STMT_FOR:
+      emit_indent(g);
+      emit(g, "for (");
+      emit_for_clause_stmt(g, st->as.for_stmt.init);
+      emit(g, "; ");
+      if (st->as.for_stmt.cond) emit_expr(g, st->as.for_stmt.cond);
+      emit(g, "; ");
+      emit_for_clause_stmt(g, st->as.for_stmt.update);
+      emit(g, ")\n");
+      emit_stmt(g, st->as.for_stmt.body);
       break;
   }
 }
