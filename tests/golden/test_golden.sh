@@ -23,6 +23,7 @@ cases=(
   "string_concat:examples/string_concat.ngawi"
   "elif:examples/elif.ngawi"
   "match:examples/match.ngawi"
+  "match_bool:examples/match_bool.ngawi"
   "string_builtins:examples/string_builtins.ngawi"
   "import_main:examples/import_main.ngawi"
 )

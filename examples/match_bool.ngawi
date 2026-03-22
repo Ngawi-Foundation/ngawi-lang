@@ -1,0 +1,10 @@
+fn main() -> amba {
+  muwani ok: fuad = true;
+
+  match ok {
+    true => { print("yes"); }
+    false => { print("no"); }
+  }
+
+  return 0;
+}

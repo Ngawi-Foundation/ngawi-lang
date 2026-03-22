@@ -365,10 +365,12 @@ static void emit_stmt(CGen *g, Stmt *st) {
       for (size_t i = 0; i < st->as.match_stmt.arm_count; i++) {
         MatchArm *arm = &st->as.match_stmt.arms[i];
         emit_indent(g);
-        if (arm->is_wildcard) {
+        if (arm->pattern_kind == MATCH_PATTERN_WILDCARD) {
           emit(g, "default:\n");
-        } else {
+        } else if (arm->pattern_kind == MATCH_PATTERN_INT) {
           emitf(g, "case %lld:\n", (long long)arm->int_value);
+        } else {
+          emitf(g, "case %d:\n", arm->bool_value ? 1 : 0);
         }
 
         emit_indent(g);

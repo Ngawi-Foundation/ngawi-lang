@@ -69,9 +69,16 @@ typedef enum StmtKind {
   STMT_CONTINUE,
 } StmtKind;
 
+typedef enum MatchPatternKind {
+  MATCH_PATTERN_WILDCARD,
+  MATCH_PATTERN_INT,
+  MATCH_PATTERN_BOOL,
+} MatchPatternKind;
+
 typedef struct MatchArm {
-  int is_wildcard;
+  MatchPatternKind pattern_kind;
   int64_t int_value;
+  int bool_value;
   int line;
   int col;
   Stmt *body;

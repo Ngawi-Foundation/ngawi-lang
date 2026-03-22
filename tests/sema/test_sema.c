@@ -307,12 +307,32 @@ static void test_match_rules(void) {
       "  return 0;\n"
       "}\n";
 
+  const char *ok_bool_src =
+      "fn main() -> int {\n"
+      "  let ok: bool = true;\n"
+      "  match ok {\n"
+      "    true => { print(\"t\"); }\n"
+      "    false => { print(\"f\"); }\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
   const char *dup_src =
       "fn main() -> int {\n"
       "  let x: int = 1;\n"
       "  match x {\n"
       "    1 => { print(\"a\"); }\n"
       "    1 => { print(\"b\"); }\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *dup_bool_src =
+      "fn main() -> int {\n"
+      "  let ok: bool = true;\n"
+      "  match ok {\n"
+      "    true => { print(\"a\"); }\n"
+      "    true => { print(\"b\"); }\n"
       "  }\n"
       "  return 0;\n"
       "}\n";
@@ -326,10 +346,26 @@ static void test_match_rules(void) {
       "  return 0;\n"
       "}\n";
 
-  expect(run_program("match_ok.ngawi", ok_src, 0) == 0, "valid match should pass");
-  expect(run_program("match_dup.ngawi", dup_src, 1) != 0, "duplicate match arm should fail");
+  const char *bad_arm_src =
+      "fn main() -> int {\n"
+      "  let ok: bool = true;\n"
+      "  match ok {\n"
+      "    1 => { print(\"one\"); }\n"
+      "    _ => { print(\"other\"); }\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("match_ok.ngawi", ok_src, 0) == 0, "valid int match should pass");
+  expect(run_program("match_ok_bool.ngawi", ok_bool_src, 0) == 0,
+         "valid bool match should pass");
+  expect(run_program("match_dup.ngawi", dup_src, 1) != 0, "duplicate int match arm should fail");
+  expect(run_program("match_dup_bool.ngawi", dup_bool_src, 1) != 0,
+         "duplicate bool match arm should fail");
   expect(run_program("match_bad_type.ngawi", bad_type_src, 1) != 0,
-         "non-int match subject should fail");
+         "non-int/bool match subject should fail");
+  expect(run_program("match_bad_arm.ngawi", bad_arm_src, 1) != 0,
+         "bool match with int arm should fail");
 }
 
 static void test_missing_main(void) {

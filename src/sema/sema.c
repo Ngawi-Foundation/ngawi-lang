@@ -651,8 +651,8 @@ static void check_stmt(Sema *s, Stmt *st) {
 
     case STMT_MATCH: {
       TypeKind stype = check_expr(s, st->as.match_stmt.subject);
-      if (stype != TYPE_VOID && !type_eq(stype, TYPE_INT)) {
-        sema_error(s, st->line, st->col, "match subject must be int, got '%s'",
+      if (stype != TYPE_VOID && !type_eq(stype, TYPE_INT) && !type_eq(stype, TYPE_BOOL)) {
+        sema_error(s, st->line, st->col, "match subject must be int or bool, got '%s'",
                    type_kind_name(stype));
       }
 
@@ -660,17 +660,30 @@ static void check_stmt(Sema *s, Stmt *st) {
       for (size_t i = 0; i < st->as.match_stmt.arm_count; i++) {
         MatchArm *arm = &st->as.match_stmt.arms[i];
 
-        if (arm->is_wildcard) {
+        if (arm->pattern_kind == MATCH_PATTERN_WILDCARD) {
           wildcard_count++;
           if (wildcard_count > 1) {
             sema_error(s, arm->line, arm->col, "match allows only one wildcard '_' arm");
           }
         } else {
+          if (stype == TYPE_INT && arm->pattern_kind != MATCH_PATTERN_INT) {
+            sema_error(s, arm->line, arm->col, "int match arm must be int literal or '_'");
+          } else if (stype == TYPE_BOOL && arm->pattern_kind != MATCH_PATTERN_BOOL) {
+            sema_error(s, arm->line, arm->col, "bool match arm must be true/false or '_'");
+          }
+
           for (size_t j = 0; j < i; j++) {
             MatchArm *prev = &st->as.match_stmt.arms[j];
-            if (!prev->is_wildcard && prev->int_value == arm->int_value) {
+            if (prev->pattern_kind != arm->pattern_kind) continue;
+
+            if (arm->pattern_kind == MATCH_PATTERN_INT && prev->int_value == arm->int_value) {
               sema_error(s, arm->line, arm->col, "duplicate match arm value '%lld'",
                          (long long)arm->int_value);
+              break;
+            }
+            if (arm->pattern_kind == MATCH_PATTERN_BOOL && prev->bool_value == arm->bool_value) {
+              sema_error(s, arm->line, arm->col, "duplicate match arm value '%s'",
+                         arm->bool_value ? "true" : "false");
               break;
             }
           }

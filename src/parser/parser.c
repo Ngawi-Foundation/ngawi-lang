@@ -566,16 +566,21 @@ static Stmt *parse_match(Parser *p) {
     arm.col = p->cur.col;
 
     if (token_is_wildcard_ident(p->cur)) {
-      arm.is_wildcard = 1;
+      arm.pattern_kind = MATCH_PATTERN_WILDCARD;
       advance(p);
     } else if (check(p, TOK_INT_LIT)) {
       Token lit = p->cur;
       char *tmp = dup_lexeme(&lit);
+      arm.pattern_kind = MATCH_PATTERN_INT;
       arm.int_value = strtoll(tmp, NULL, 10);
       free(tmp);
       advance(p);
+    } else if (check(p, TOK_KW_TRUE) || check(p, TOK_KW_FALSE)) {
+      arm.pattern_kind = MATCH_PATTERN_BOOL;
+      arm.bool_value = check(p, TOK_KW_TRUE) ? 1 : 0;
+      advance(p);
     } else {
-      parse_error(p, "expected int literal or '_' in match arm");
+      parse_error(p, "expected int/bool literal or '_' in match arm");
       break;
     }
 

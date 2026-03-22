@@ -181,6 +181,25 @@ static void test_parse_match_stmt(void) {
   program_free(p);
 }
 
+static void test_parse_match_bool_stmt(void) {
+  const char *src =
+      "fn main() -> int {\n"
+      "  let ok: bool = true;\n"
+      "  match ok {\n"
+      "    true => { print(\"t\"); }\n"
+      "    false => { print(\"f\"); }\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program("match_bool.ngawi", src, &had_error);
+  expect(had_error == 0, "bool match parse should succeed");
+  expect(p != NULL, "bool match program not null");
+  expect(p->func_count == 1, "bool match one function expected");
+  program_free(p);
+}
+
 static void test_parse_for_loop(void) {
   const char *src =
       "fn main() -> int {\n"
@@ -242,6 +261,7 @@ int main(void) {
   test_parse_incdec_stmt();
   test_parse_elif_chain();
   test_parse_match_stmt();
+  test_parse_match_bool_stmt();
   test_parse_for_loop();
   test_parse_break_continue();
   test_parse_recovery_keeps_following_functions();
