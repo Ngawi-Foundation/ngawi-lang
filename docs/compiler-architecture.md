@@ -39,12 +39,12 @@ Ngawi compiles source code to native binaries through C11.
   - print helpers
   - string helpers (`eq`, `len`, `concat`, `contains`, `starts_with`, `to_lower`)
 
-Current string allocation model (MVP):
+Current string allocation model:
 
-- `ng_string_concat` and `ng_string_to_lower` allocate a new heap buffer (`malloc`)
-- compiler/runtime do not free these buffers yet
-- this is acceptable for current short-lived CLI programs, but not production-safe for long-running workloads
-- planned improvement: dedicated runtime string memory strategy
+- `ng_string_concat` and `ng_string_to_lower` allocate owned runtime buffers
+- runtime tracks these buffers and frees them automatically at process exit (`atexit` cleanup)
+- allocations still grow with string-heavy workloads during program lifetime
+- future improvement target: reusable arena/ring strategy for long-running programs
 
 ### Driver
 

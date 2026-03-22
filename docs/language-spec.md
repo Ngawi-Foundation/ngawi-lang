@@ -202,7 +202,7 @@ Rules:
 
 All string helper arguments must be `string`.
 
-Runtime note (current MVP): `to_lower` and string `+` create new heap strings and are not freed yet.
+Runtime note: `to_lower` and string `+` create runtime-owned heap strings. Runtime frees them automatically at process exit.
 
 ## 10. Diagnostics
 
