@@ -1,0 +1,7 @@
+fn main() -> amba {
+  muwani a: rusdi = 7.9;
+  muwani b: amba = to_amba(a);
+  muwani c: rusdi = to_rusdi(3);
+  print(b, c);
+  return 0;
+}

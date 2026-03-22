@@ -154,6 +154,22 @@ static void emit_expr(CGen *g, Expr *e) {
       emit(g, ")");
       break;
     case EXPR_CALL:
+      if ((strcmp(e->as.call.name, "to_int") == 0 || strcmp(e->as.call.name, "to_amba") == 0) &&
+          e->as.call.arg_count == 1) {
+        emit(g, "((int64_t)(");
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, "))");
+        break;
+      }
+      if ((strcmp(e->as.call.name, "to_float") == 0 ||
+           strcmp(e->as.call.name, "to_rusdi") == 0) &&
+          e->as.call.arg_count == 1) {
+        emit(g, "((double)(");
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, "))");
+        break;
+      }
+
       emit(g, e->as.call.name);
       emit(g, "(");
       for (size_t i = 0; i < e->as.call.arg_count; i++) {

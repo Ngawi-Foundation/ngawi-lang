@@ -91,6 +91,29 @@ static void test_modulo_type_rules(void) {
   expect(run_program("mod_bad.ngawi", bad_src) != 0, "float modulo should fail");
 }
 
+static void test_builtin_casts(void) {
+  const char *ok_src =
+      "fn main() -> int {\n"
+      "  let a: float = 3.8;\n"
+      "  let b: int = to_int(a);\n"
+      "  let c: float = to_float(7);\n"
+      "  let d: int = to_amba(a);\n"
+      "  let e: float = to_rusdi(9);\n"
+      "  print(b, c, d, e);\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_src =
+      "fn main() -> int {\n"
+      "  let s: string = \"x\";\n"
+      "  let v = to_amba(s);\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("cast_ok.ngawi", ok_src) == 0, "valid casts should pass");
+  expect(run_program("cast_bad.ngawi", bad_src) != 0, "invalid cast arg should fail");
+}
+
 static void test_missing_main(void) {
   const char *src =
       "fn nope() -> int {\n"
@@ -104,6 +127,7 @@ int main(void) {
   test_valid_program();
   test_type_mismatch();
   test_modulo_type_rules();
+  test_builtin_casts();
   test_break_continue_scope();
   test_missing_main();
 

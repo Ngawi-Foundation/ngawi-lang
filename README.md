@@ -76,6 +76,11 @@ Declaration aliases:
 - `let` or `muwani`
 - `const` or `crot`
 
+Cast builtin aliases:
+
+- `to_int(x)` or `to_amba(x)`
+- `to_float(x)` or `to_rusdi(x)`
+
 ## Example
 
 ```ngawi
