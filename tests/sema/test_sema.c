@@ -48,6 +48,30 @@ static void test_type_mismatch(void) {
          "assignment type mismatch should fail sema");
 }
 
+static void test_break_continue_scope(void) {
+  const char *ok_src =
+      "fn main() -> int {\n"
+      "  let i: int = 0;\n"
+      "  while (i < 5) {\n"
+      "    i = i + 1;\n"
+      "    if (i == 2) { continue; }\n"
+      "    if (i == 4) { break; }\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_src =
+      "fn main() -> int {\n"
+      "  break;\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("loop_ctrl_ok.ngawi", ok_src) == 0,
+         "break/continue inside loop should pass");
+  expect(run_program("loop_ctrl_bad.ngawi", bad_src) != 0,
+         "break outside loop should fail");
+}
+
 static void test_missing_main(void) {
   const char *src =
       "fn nope() -> int {\n"
@@ -60,6 +84,7 @@ static void test_missing_main(void) {
 int main(void) {
   test_valid_program();
   test_type_mismatch();
+  test_break_continue_scope();
   test_missing_main();
 
   if (failures) {

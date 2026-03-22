@@ -32,6 +32,7 @@ typedef struct Sema {
   int error_count;
   int max_errors;
   int stop_analysis;
+  int loop_depth;
   Scope *scope;
   FuncSymbol *funcs;
   size_t func_count;
@@ -499,7 +500,9 @@ static void check_stmt(Sema *s, Stmt *st) {
         sema_error(s, st->line, st->col, "while condition must be bool, got '%s'",
                    type_kind_name(ct));
       }
+      s->loop_depth++;
       check_stmt(s, st->as.while_stmt.body);
+      s->loop_depth--;
       break;
     }
 
@@ -517,11 +520,26 @@ static void check_stmt(Sema *s, Stmt *st) {
       }
 
       if (st->as.for_stmt.update) check_stmt(s, st->as.for_stmt.update);
+
+      s->loop_depth++;
       check_stmt(s, st->as.for_stmt.body);
+      s->loop_depth--;
 
       pop_scope(s);
       break;
     }
+
+    case STMT_BREAK:
+      if (s->loop_depth <= 0) {
+        sema_error(s, st->line, st->col, "'break' can only be used inside a loop");
+      }
+      break;
+
+    case STMT_CONTINUE:
+      if (s->loop_depth <= 0) {
+        sema_error(s, st->line, st->col, "'continue' can only be used inside a loop");
+      }
+      break;
   }
 }
 

@@ -1,0 +1,18 @@
+fn main() -> amba {
+  muwani i: amba = 0;
+  muwani sum: amba = 0;
+
+  while (i < 6) {
+    i = i + 1;
+    if (i == 2) {
+      continue;
+    }
+    if (i == 5) {
+      break;
+    }
+    sum = sum + i;
+  }
+
+  print(sum);
+  return 0;
+}

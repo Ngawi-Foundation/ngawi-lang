@@ -12,5 +12,6 @@ mkdir -p tests/golden/expected
 ./ngawic build examples/while.ngawi -o tests/golden/expected/while_loop -S >/dev/null
 ./ngawic build examples/forward_call.ngawi -o tests/golden/expected/forward_call -S >/dev/null
 ./ngawic build examples/for_loop.ngawi -o tests/golden/expected/for_loop -S >/dev/null
+./ngawic build examples/break_continue.ngawi -o tests/golden/expected/break_continue -S >/dev/null
 
 echo "Golden files updated"

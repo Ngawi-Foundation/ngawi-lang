@@ -112,6 +112,24 @@ static void test_alias_decl_keywords(void) {
   }
 }
 
+static void test_loop_control_keywords(void) {
+  const char *src = "break; continue;";
+  Lexer lx;
+  lexer_init(&lx, "loop_ctrl.ngawi", src);
+
+  Token t1 = lexer_next(&lx);
+  Token t2 = lexer_next(&lx);
+  Token t3 = lexer_next(&lx);
+  Token t4 = lexer_next(&lx);
+  Token t5 = lexer_next(&lx);
+
+  expect_kind(t1, TOK_KW_BREAK, "kw_break");
+  expect_kind(t2, TOK_SEMI, "kw_break_semi");
+  expect_kind(t3, TOK_KW_CONTINUE, "kw_continue");
+  expect_kind(t4, TOK_SEMI, "kw_continue_semi");
+  expect_kind(t5, TOK_EOF, "kw_continue_eof");
+}
+
 static void test_invalid_token(void) {
   const char *src = "let x = @;";
   Lexer lx;
@@ -130,6 +148,7 @@ int main(void) {
   test_numbers_strings_comments();
   test_alias_type_keywords();
   test_alias_decl_keywords();
+  test_loop_control_keywords();
   test_invalid_token();
 
   if (failures > 0) {

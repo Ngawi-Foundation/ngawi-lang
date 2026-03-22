@@ -64,6 +64,8 @@ typedef enum StmtKind {
   STMT_IF,
   STMT_WHILE,
   STMT_FOR,
+  STMT_BREAK,
+  STMT_CONTINUE,
 } StmtKind;
 
 struct Stmt {

@@ -79,6 +79,8 @@ static TokenKind keyword_kind(const char *s, size_t n) {
   if (n == 4 && strncmp(s, "crot", 4) == 0) return TOK_KW_CONST;
   if (n == 5 && strncmp(s, "while", 5) == 0) return TOK_KW_WHILE;
   if (n == 3 && strncmp(s, "for", 3) == 0) return TOK_KW_FOR;
+  if (n == 5 && strncmp(s, "break", 5) == 0) return TOK_KW_BREAK;
+  if (n == 8 && strncmp(s, "continue", 8) == 0) return TOK_KW_CONTINUE;
   if (n == 5 && strncmp(s, "false", 5) == 0) return TOK_KW_FALSE;
   if (n == 5 && strncmp(s, "float", 5) == 0) return TOK_KW_FLOAT;
   if (n == 5 && strncmp(s, "rusdi", 5) == 0) return TOK_KW_RUSDI;
@@ -214,6 +216,8 @@ const char *token_kind_name(TokenKind kind) {
     case TOK_KW_ELSE: return "KW_ELSE";
     case TOK_KW_WHILE: return "KW_WHILE";
     case TOK_KW_FOR: return "KW_FOR";
+    case TOK_KW_BREAK: return "KW_BREAK";
+    case TOK_KW_CONTINUE: return "KW_CONTINUE";
     case TOK_KW_TRUE: return "KW_TRUE";
     case TOK_KW_FALSE: return "KW_FALSE";
     case TOK_KW_VOID: return "KW_VOID";

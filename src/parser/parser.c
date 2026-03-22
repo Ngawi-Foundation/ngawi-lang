@@ -82,7 +82,8 @@ static void synchronize(Parser *p) {
 
     if (check(p, TOK_RBRACE) || check(p, TOK_KW_FN) || check(p, TOK_KW_LET) ||
         check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_WHILE) ||
-        check(p, TOK_KW_FOR) || check(p, TOK_KW_RETURN)) {
+        check(p, TOK_KW_FOR) || check(p, TOK_KW_BREAK) || check(p, TOK_KW_CONTINUE) ||
+        check(p, TOK_KW_RETURN)) {
       return;
     }
 
@@ -493,6 +494,20 @@ static Stmt *parse_statement(Parser *p) {
     return s;
   }
 
+  if (check(p, TOK_KW_BREAK)) {
+    Token kw = p->cur;
+    advance(p);
+    consume(p, TOK_SEMI, "expected ';' after break");
+    return new_stmt(STMT_BREAK, kw.line, kw.col);
+  }
+
+  if (check(p, TOK_KW_CONTINUE)) {
+    Token kw = p->cur;
+    advance(p);
+    consume(p, TOK_SEMI, "expected ';' after continue");
+    return new_stmt(STMT_CONTINUE, kw.line, kw.col);
+  }
+
   if (check(p, TOK_IDENT) && p->next.kind == TOK_ASSIGN) {
     Token name = p->cur;
     advance(p);
@@ -627,6 +642,9 @@ static void stmt_free(Stmt *s) {
       expr_free(s->as.for_stmt.cond);
       stmt_free(s->as.for_stmt.update);
       stmt_free(s->as.for_stmt.body);
+      break;
+    case STMT_BREAK:
+    case STMT_CONTINUE:
       break;
   }
   free(s);

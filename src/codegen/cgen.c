@@ -283,6 +283,16 @@ static void emit_stmt(CGen *g, Stmt *st) {
       emit(g, ")\n");
       emit_stmt(g, st->as.for_stmt.body);
       break;
+
+    case STMT_BREAK:
+      emit_indent(g);
+      emit(g, "break;\n");
+      break;
+
+    case STMT_CONTINUE:
+      emit_indent(g);
+      emit(g, "continue;\n");
+      break;
   }
 }
 

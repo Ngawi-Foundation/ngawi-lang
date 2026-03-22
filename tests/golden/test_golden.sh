@@ -13,6 +13,7 @@ cases=(
   "while_loop:examples/while.ngawi"
   "forward_call:examples/forward_call.ngawi"
   "for_loop:examples/for_loop.ngawi"
+  "break_continue:examples/break_continue.ngawi"
 )
 
 for entry in "${cases[@]}"; do
