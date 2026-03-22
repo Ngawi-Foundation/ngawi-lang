@@ -1,0 +1,66 @@
+#ifndef NGAWI_TOKEN_H
+#define NGAWI_TOKEN_H
+
+#include <stddef.h>
+
+typedef enum TokenKind {
+  TOK_EOF = 0,
+  TOK_INVALID,
+
+  TOK_IDENT,
+  TOK_INT_LIT,
+  TOK_FLOAT_LIT,
+  TOK_STRING_LIT,
+
+  TOK_KW_FN,
+  TOK_KW_RETURN,
+  TOK_KW_LET,
+  TOK_KW_CONST,
+  TOK_KW_IF,
+  TOK_KW_ELSE,
+  TOK_KW_WHILE,
+  TOK_KW_TRUE,
+  TOK_KW_FALSE,
+  TOK_KW_VOID,
+  TOK_KW_INT,
+  TOK_KW_FLOAT,
+  TOK_KW_BOOL,
+  TOK_KW_STRING,
+
+  TOK_PLUS,
+  TOK_MINUS,
+  TOK_STAR,
+  TOK_SLASH,
+  TOK_BANG,
+  TOK_ASSIGN,
+
+  TOK_EQ,
+  TOK_NE,
+  TOK_LT,
+  TOK_LE,
+  TOK_GT,
+  TOK_GE,
+  TOK_AND_AND,
+  TOK_OR_OR,
+  TOK_ARROW,
+
+  TOK_LPAREN,
+  TOK_RPAREN,
+  TOK_LBRACE,
+  TOK_RBRACE,
+  TOK_COMMA,
+  TOK_COLON,
+  TOK_SEMI,
+} TokenKind;
+
+typedef struct Token {
+  TokenKind kind;
+  const char *start;
+  size_t length;
+  int line;
+  int col;
+} Token;
+
+const char *token_kind_name(TokenKind kind);
+
+#endif

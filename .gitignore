@@ -1,0 +1,11 @@
+# Build outputs
+/ngawic
+/test_lexer
+/test_parser
+/test_sema
+/e2e_*
+/*.o
+/*.gcda
+/*.gcno
+/*.gcov
+/tests/golden/actual/*.c

@@ -1,0 +1,4 @@
+fn main() -> int {
+  print("Hello, Ngawi");
+  return 0;
+}

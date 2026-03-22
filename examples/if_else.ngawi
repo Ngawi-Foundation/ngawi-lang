@@ -1,0 +1,9 @@
+fn main() -> int {
+  let n: int = 7;
+  if (n > 5) {
+    print("big");
+  } else {
+    print("small");
+  }
+  return 0;
+}
