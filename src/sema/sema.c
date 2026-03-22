@@ -383,7 +383,21 @@ static TypeKind check_expr(Sema *s, Expr *e) {
 
       if (lhs == TYPE_VOID || rhs == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
 
-      if (op == TOK_PLUS || op == TOK_MINUS || op == TOK_STAR || op == TOK_SLASH) {
+      if (op == TOK_PLUS) {
+        if (type_eq(lhs, TYPE_STRING) && type_eq(rhs, TYPE_STRING)) {
+          return set_expr_type(e, TYPE_STRING);
+        }
+
+        if (!type_is_numeric(lhs) || !type_is_numeric(rhs) || !type_eq(lhs, rhs)) {
+          sema_error(s, e->line, e->col,
+                     "'+' expects same numeric types or two strings, got '%s' and '%s'",
+                     type_kind_name(lhs), type_kind_name(rhs));
+          return set_expr_type(e, TYPE_VOID);
+        }
+        return set_expr_type(e, lhs);
+      }
+
+      if (op == TOK_MINUS || op == TOK_STAR || op == TOK_SLASH) {
         if (!type_is_numeric(lhs) || !type_is_numeric(rhs) || !type_eq(lhs, rhs)) {
           sema_error(s, e->line, e->col,
                      "arithmetic operator expects same numeric types, got '%s' and '%s'",

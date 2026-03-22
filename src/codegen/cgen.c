@@ -159,6 +159,17 @@ static void emit_expr(CGen *g, Expr *e) {
         break;
       }
 
+      if (e->as.binary.op == TOK_PLUS && e->as.binary.left && e->as.binary.right &&
+          e->as.binary.left->inferred_type == TYPE_STRING &&
+          e->as.binary.right->inferred_type == TYPE_STRING) {
+        emit(g, "ng_string_concat(");
+        emit_expr(g, e->as.binary.left);
+        emit(g, ", ");
+        emit_expr(g, e->as.binary.right);
+        emit(g, ")");
+        break;
+      }
+
       emit(g, "(");
       emit_expr(g, e->as.binary.left);
       emit(g, " ");

@@ -107,6 +107,7 @@ Operators:
 Operator notes:
 
 - `%` requires `int` operands.
+- `+` supports `string + string` concatenation.
 - string equality uses value comparison in runtime (`==` and `!=` on `string`).
 
 ## 7. Functions

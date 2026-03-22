@@ -222,6 +222,29 @@ static void test_string_equality(void) {
   expect(run_program("str_eq_bad.ngawi", bad_src, 1) != 0, "mixed equality should fail");
 }
 
+static void test_string_concat(void) {
+  const char *ok_src =
+      "fn main() -> int {\n"
+      "  let a: string = \"na\";\n"
+      "  let b: string = \"gawi\";\n"
+      "  let s: string = a + b;\n"
+      "  print(s);\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_src =
+      "fn main() -> int {\n"
+      "  let a: string = \"x\";\n"
+      "  let n: int = 1;\n"
+      "  let s = a + n;\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("str_concat_ok.ngawi", ok_src, 0) == 0, "string concat should pass");
+  expect(run_program("str_concat_bad.ngawi", bad_src, 1) != 0,
+         "string plus non-string should fail");
+}
+
 static void test_len_builtin(void) {
   const char *ok_src =
       "fn main() -> int {\n"
@@ -259,6 +282,7 @@ int main(void) {
   test_compound_assign_rules();
   test_incdec_rules();
   test_string_equality();
+  test_string_concat();
   test_len_builtin();
   test_break_continue_scope();
   test_missing_main();

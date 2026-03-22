@@ -69,6 +69,10 @@ while (true) {
 - Compare: `== != < <= > >=`
 - Logical: `&& || !`
 
+String note:
+
+- `+` supports string concatenation when both operands are `string`.
+
 ## Builtins
 
 ### print

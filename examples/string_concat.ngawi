@@ -1,0 +1,7 @@
+fn main() -> amba {
+  muwani a: imut = "ng";
+  muwani b: imut = "awi";
+  muwani s: imut = a + b;
+  print(s);
+  return 0;
+}
