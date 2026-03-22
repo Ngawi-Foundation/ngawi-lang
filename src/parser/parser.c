@@ -14,6 +14,10 @@ typedef struct Parser {
   Token cur;
   Token next;
   int had_error;
+  int error_count;
+  int max_errors;
+  int panic_mode;
+  int stop_parsing;
 } Parser;
 
 static void *xcalloc(size_t n, size_t sz) {
@@ -45,6 +49,10 @@ static void parser_init(Parser *p, const char *file, const char *source) {
   p->file = file;
   p->source = source;
   p->had_error = 0;
+  p->error_count = 0;
+  p->max_errors = 20;
+  p->panic_mode = 0;
+  p->stop_parsing = 0;
   lexer_init(&p->lx, file, source);
   p->cur = lexer_next(&p->lx);
   p->next = lexer_next(&p->lx);
@@ -63,10 +71,40 @@ static int match(Parser *p, TokenKind k) {
   return 1;
 }
 
+static void synchronize(Parser *p) {
+  p->panic_mode = 0;
+
+  while (!check(p, TOK_EOF)) {
+    if (check(p, TOK_SEMI)) {
+      advance(p);
+      return;
+    }
+
+    if (check(p, TOK_RBRACE) || check(p, TOK_KW_FN) || check(p, TOK_KW_LET) ||
+        check(p, TOK_KW_CONST) || check(p, TOK_KW_IF) || check(p, TOK_KW_WHILE) ||
+        check(p, TOK_KW_RETURN)) {
+      return;
+    }
+
+    advance(p);
+  }
+}
+
 static void parse_error(Parser *p, const char *msg) {
+  if (p->panic_mode) return;
+
+  p->panic_mode = 1;
   diag_error_source(p->file, p->source, p->cur.line, p->cur.col, "%s, found %s", msg,
                     token_kind_name(p->cur.kind));
+
   p->had_error = 1;
+  p->error_count++;
+
+  if (p->error_count >= p->max_errors) {
+    diag_error(p->file, p->cur.line, p->cur.col, "too many parser errors (max %d)",
+               p->max_errors);
+    p->stop_parsing = 1;
+  }
 }
 
 static Token consume(Parser *p, TokenKind k, const char *msg) {
@@ -292,11 +330,13 @@ static Stmt *parse_block(Parser *p) {
   blk->as.block.items = NULL;
   blk->as.block.count = 0;
 
-  while (!check(p, TOK_RBRACE) && !check(p, TOK_EOF)) {
+  while (!check(p, TOK_RBRACE) && !check(p, TOK_EOF) && !p->stop_parsing) {
     Stmt *it = parse_statement(p);
     blk->as.block.items = (Stmt **)xrealloc(blk->as.block.items, blk->as.block.count + 1,
                                             sizeof(Stmt *));
     blk->as.block.items[blk->as.block.count++] = it;
+
+    if (p->panic_mode) synchronize(p);
   }
 
   consume(p, TOK_RBRACE, "expected '}'");
@@ -431,16 +471,19 @@ Program *parse_program(const char *file, const char *source, int *had_error) {
   parser_init(&p, file, source);
 
   Program *prog = (Program *)xcalloc(1, sizeof(Program));
-  while (!check(&p, TOK_EOF)) {
+  while (!check(&p, TOK_EOF) && !p.stop_parsing) {
     if (!check(&p, TOK_KW_FN)) {
       parse_error(&p, "expected top-level 'fn'");
-      break;
+      synchronize(&p);
+      continue;
     }
+
     FunctionDecl fn = parse_function(&p);
     prog->funcs = (FunctionDecl *)xrealloc(prog->funcs, prog->func_count + 1,
                                            sizeof(FunctionDecl));
     prog->funcs[prog->func_count++] = fn;
-    if (p.had_error) break;
+
+    if (p.panic_mode) synchronize(&p);
   }
 
   if (had_error) *had_error = p.had_error;
