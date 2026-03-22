@@ -15,6 +15,8 @@ cases=(
   "for_loop:examples/for_loop.ngawi"
   "break_continue:examples/break_continue.ngawi"
   "modulo:examples/modulo.ngawi"
+  "cast:examples/cast.ngawi"
+  "string_eq:examples/string_eq.ngawi"
 )
 
 for entry in "${cases[@]}"; do

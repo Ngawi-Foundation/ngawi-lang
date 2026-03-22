@@ -1,0 +1,7 @@
+fn main() -> amba {
+  muwani a: imut = "ngawi";
+  muwani b: imut = "ngawi";
+  muwani c: imut = "lang";
+  print(a == b, a != c);
+  return 0;
+}

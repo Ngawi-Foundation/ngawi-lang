@@ -29,5 +29,7 @@ run_case examples/forward_call.ngawi e2e_forward "42"
 run_case examples/for_loop.ngawi e2e_for "6"
 run_case examples/break_continue.ngawi e2e_break_continue "8"
 run_case examples/modulo.ngawi e2e_modulo "1"
+run_case examples/cast.ngawi e2e_cast "7 3"
+run_case examples/string_eq.ngawi e2e_string_eq "true true"
 
 echo "All e2e tests passed"

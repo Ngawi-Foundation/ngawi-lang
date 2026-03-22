@@ -145,6 +145,20 @@ static void emit_expr(CGen *g, Expr *e) {
       emit(g, ")");
       break;
     case EXPR_BINARY:
+      if ((e->as.binary.op == TOK_EQ || e->as.binary.op == TOK_NE) &&
+          e->as.binary.left && e->as.binary.right &&
+          e->as.binary.left->inferred_type == TYPE_STRING &&
+          e->as.binary.right->inferred_type == TYPE_STRING) {
+        if (e->as.binary.op == TOK_NE) emit(g, "(!");
+        emit(g, "ng_string_eq(");
+        emit_expr(g, e->as.binary.left);
+        emit(g, ", ");
+        emit_expr(g, e->as.binary.right);
+        emit(g, ")");
+        if (e->as.binary.op == TOK_NE) emit(g, ")");
+        break;
+      }
+
       emit(g, "(");
       emit_expr(g, e->as.binary.left);
       emit(g, " ");

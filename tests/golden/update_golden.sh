@@ -14,5 +14,7 @@ mkdir -p tests/golden/expected
 ./ngawic build examples/for_loop.ngawi -o tests/golden/expected/for_loop -S >/dev/null
 ./ngawic build examples/break_continue.ngawi -o tests/golden/expected/break_continue -S >/dev/null
 ./ngawic build examples/modulo.ngawi -o tests/golden/expected/modulo -S >/dev/null
+./ngawic build examples/cast.ngawi -o tests/golden/expected/cast -S >/dev/null
+./ngawic build examples/string_eq.ngawi -o tests/golden/expected/string_eq -S >/dev/null
 
 echo "Golden files updated"

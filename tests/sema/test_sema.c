@@ -114,6 +114,28 @@ static void test_builtin_casts(void) {
   expect(run_program("cast_bad.ngawi", bad_src) != 0, "invalid cast arg should fail");
 }
 
+static void test_string_equality(void) {
+  const char *ok_src =
+      "fn main() -> int {\n"
+      "  let a: string = \"x\";\n"
+      "  let b: string = \"x\";\n"
+      "  let same: bool = a == b;\n"
+      "  print(same);\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_src =
+      "fn main() -> int {\n"
+      "  let a: string = \"x\";\n"
+      "  let b: int = 1;\n"
+      "  let same: bool = a == b;\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("str_eq_ok.ngawi", ok_src) == 0, "string equality should pass");
+  expect(run_program("str_eq_bad.ngawi", bad_src) != 0, "mixed equality should fail");
+}
+
 static void test_missing_main(void) {
   const char *src =
       "fn nope() -> int {\n"
@@ -128,6 +150,7 @@ int main(void) {
   test_type_mismatch();
   test_modulo_type_rules();
   test_builtin_casts();
+  test_string_equality();
   test_break_continue_scope();
   test_missing_main();
 
