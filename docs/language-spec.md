@@ -247,6 +247,7 @@ Not implemented yet:
 Import behavior in current MVP:
 
 - import is a top-level directive
+- import directives must appear before any function declaration
 - import path must end with `.ngawi`
 - path resolves relative to the importing file
 - repeated imports are loaded once

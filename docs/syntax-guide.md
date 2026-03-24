@@ -11,6 +11,7 @@ import "math.ngawi";
 Import rules (current MVP):
 
 - import is top-level only
+- import declarations must appear before function declarations
 - path is resolved relative to the current file
 - path must end with `.ngawi`
 - duplicate imports are loaded once
