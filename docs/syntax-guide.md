@@ -123,7 +123,8 @@ let n: int = len(a);
 ```
 
 Current MVP supports scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`).
-Empty array literal is not supported yet.
+Empty array literal is supported only with explicit type context, for example:
+`let a: int[] = [];`
 
 ## Operators
 

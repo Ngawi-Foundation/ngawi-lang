@@ -81,6 +81,7 @@ Supported statements:
 - variable declaration (`let`, `const`)
 - assignment
 - indexed assignment (`a[i] = v`) for scalar arrays
+- empty array literal `[]` requires explicit array type context
 - compound assignment (`+=`, `-=`, `*=`, `/=`, `%=`)
 - postfix increment/decrement (`x++;`, `x--;`)
 - expression statement
