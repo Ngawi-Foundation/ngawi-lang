@@ -474,6 +474,20 @@ static void test_array_mvp(void) {
       "  return 0;\n"
       "}\n";
 
+  const char *ok_empty_src =
+      "fn main() -> int {\n"
+      "  let a: int[] = [];\n"
+      "  let n: int = len(a);\n"
+      "  print(n);\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_empty_untyped_src =
+      "fn main() -> int {\n"
+      "  let a = [];\n"
+      "  return 0;\n"
+      "}\n";
+
   expect(run_program("array_ok.ngawi", ok_src, 0) == 0,
          "scalar arrays read/write/index/len should pass");
   expect(run_program("array_bad_elem.ngawi", bad_elem_src, 1) != 0,
@@ -484,6 +498,10 @@ static void test_array_mvp(void) {
          "array index must be int");
   expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,
          "int[] assignment expects int value");
+  expect(run_program("array_ok_empty.ngawi", ok_empty_src, 0) == 0,
+         "empty array literal with explicit type should pass");
+  expect(run_program("array_bad_empty_untyped.ngawi", bad_empty_untyped_src, 1) != 0,
+         "empty array literal without type context should fail");
 }
 
 static void test_missing_main(void) {

@@ -1,0 +1,5 @@
+fn main() -> amba {
+  muwani a: amba[] = [];
+  print(len(a));
+  return 0;
+}

@@ -26,6 +26,7 @@ mkdir -p tests/golden/expected
 ./ngawic build examples/match_string.ngawi -o tests/golden/expected/match_string -S >/dev/null
 ./ngawic build examples/string_builtins.ngawi -o tests/golden/expected/string_builtins -S >/dev/null
 ./ngawic build examples/array_int.ngawi -o tests/golden/expected/array_int -S >/dev/null
+./ngawic build examples/array_empty.ngawi -o tests/golden/expected/array_empty -S >/dev/null
 ./ngawic build examples/import_main.ngawi -o tests/golden/expected/import_main -S >/dev/null
 
 echo "Golden files updated"

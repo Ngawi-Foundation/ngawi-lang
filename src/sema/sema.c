@@ -83,6 +83,10 @@ static TypeKind array_elem_type(TypeKind t) {
   }
 }
 
+static int expr_is_empty_array_literal(const Expr *e) {
+  return e && e->kind == EXPR_ARRAY_LITERAL && e->as.array_lit.count == 0;
+}
+
 static int min3(int a, int b, int c) {
   int m = a < b ? a : b;
   return m < c ? m : c;
@@ -481,7 +485,8 @@ static TypeKind check_expr(Sema *s, Expr *e) {
     }
     case EXPR_ARRAY_LITERAL: {
       if (e->as.array_lit.count == 0) {
-        sema_error(s, e->line, e->col, "empty array literal is not supported yet");
+        sema_error(s, e->line, e->col,
+                   "empty array literal requires explicit array type context");
         return set_expr_type(e, TYPE_VOID);
       }
 
@@ -666,7 +671,19 @@ static void check_stmt(Sema *s, Stmt *st) {
 
     case STMT_VAR_DECL:
     case STMT_CONST_DECL: {
-      TypeKind init_t = check_expr(s, st->as.var_decl.init);
+      TypeKind init_t = TYPE_VOID;
+      if (st->as.var_decl.has_type && expr_is_empty_array_literal(st->as.var_decl.init)) {
+        if (!type_is_array(st->as.var_decl.type)) {
+          sema_error(s, st->line, st->col,
+                     "empty array literal can only initialize an array-typed variable");
+        } else {
+          init_t = st->as.var_decl.type;
+          set_expr_type(st->as.var_decl.init, init_t);
+        }
+      } else {
+        init_t = check_expr(s, st->as.var_decl.init);
+      }
+
       TypeKind final_t = init_t;
       if (st->as.var_decl.has_type) {
         final_t = st->as.var_decl.type;
@@ -701,7 +718,13 @@ static void check_stmt(Sema *s, Stmt *st) {
         sema_error(s, st->line, st->col, "cannot assign to const variable '%s'",
                    st->as.assign.name);
       }
-      TypeKind rhs = check_expr(s, st->as.assign.value);
+      TypeKind rhs = TYPE_VOID;
+      if (expr_is_empty_array_literal(st->as.assign.value) && type_is_array(v->type)) {
+        rhs = v->type;
+        set_expr_type(st->as.assign.value, rhs);
+      } else {
+        rhs = check_expr(s, st->as.assign.value);
+      }
       if (rhs != TYPE_VOID && !type_eq(v->type, rhs)) {
         sema_error(s, st->line, st->col,
                    "cannot assign '%s' to variable '%s' of type '%s'", type_kind_name(rhs),
