@@ -277,6 +277,7 @@ static void test_parse_int_array(void) {
   const char *src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2, 3];\n"
+      "  a[1] = 9;\n"
       "  let x: int = a[1];\n"
       "  return x;\n"
       "}\n";

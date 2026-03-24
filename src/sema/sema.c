@@ -661,6 +661,25 @@ static void check_stmt(Sema *s, Stmt *st) {
       break;
     }
 
+    case STMT_INDEX_ASSIGN: {
+      TypeKind tt = check_expr(s, st->as.index_assign.target);
+      TypeKind it = check_expr(s, st->as.index_assign.index);
+      TypeKind vt = check_expr(s, st->as.index_assign.value);
+
+      if (tt != TYPE_VOID && !type_eq(tt, TYPE_INT_ARRAY)) {
+        sema_error(s, st->line, st->col, "indexed assignment expects int[] target, got '%s'",
+                   type_kind_name(tt));
+      }
+      if (it != TYPE_VOID && !type_eq(it, TYPE_INT)) {
+        sema_error(s, st->line, st->col, "array index must be int, got '%s'", type_kind_name(it));
+      }
+      if (vt != TYPE_VOID && !type_eq(vt, TYPE_INT)) {
+        sema_error(s, st->line, st->col, "int[] assignment expects int value, got '%s'",
+                   type_kind_name(vt));
+      }
+      break;
+    }
+
     case STMT_EXPR:
       (void)check_expr(s, st->as.expr_stmt.expr);
       break;

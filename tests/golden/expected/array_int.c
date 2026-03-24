@@ -9,6 +9,7 @@ int main(void);
 int main(void)
 {
   ng_int_array_t a = (ng_int_array_t){.data=(int64_t[]){10, 20, 30}, .len=3};
+  (a).data[1] = 99;
   int64_t x = ((a).data[1]);
   int64_t n = ((a).len);
   ng_print_int(x);

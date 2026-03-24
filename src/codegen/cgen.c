@@ -309,6 +309,15 @@ static void emit_for_clause_stmt(CGen *g, Stmt *st) {
       emit_expr(g, st->as.assign.value);
       break;
 
+    case STMT_INDEX_ASSIGN:
+      emit(g, "(");
+      emit_expr(g, st->as.index_assign.target);
+      emit(g, ").data[");
+      emit_expr(g, st->as.index_assign.index);
+      emit(g, "] = ");
+      emit_expr(g, st->as.index_assign.value);
+      break;
+
     case STMT_EXPR:
       emit_expr(g, st->as.expr_stmt.expr);
       break;
@@ -341,6 +350,17 @@ static void emit_stmt(CGen *g, Stmt *st) {
       emit(g, st->as.assign.name);
       emit(g, " = ");
       emit_expr(g, st->as.assign.value);
+      emit(g, ";\n");
+      break;
+
+    case STMT_INDEX_ASSIGN:
+      emit_indent(g);
+      emit(g, "(");
+      emit_expr(g, st->as.index_assign.target);
+      emit(g, ").data[");
+      emit_expr(g, st->as.index_assign.index);
+      emit(g, "] = ");
+      emit_expr(g, st->as.index_assign.value);
       emit(g, ";\n");
       break;
 

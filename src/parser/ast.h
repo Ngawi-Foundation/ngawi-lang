@@ -70,6 +70,7 @@ typedef enum StmtKind {
   STMT_VAR_DECL,
   STMT_CONST_DECL,
   STMT_ASSIGN,
+  STMT_INDEX_ASSIGN,
   STMT_EXPR,
   STMT_RETURN,
   STMT_IF,
@@ -116,6 +117,11 @@ struct Stmt {
       char *name;
       Expr *value;
     } assign;
+    struct {
+      Expr *target;
+      Expr *index;
+      Expr *value;
+    } index_assign;
     struct {
       Expr *expr;
     } expr_stmt;

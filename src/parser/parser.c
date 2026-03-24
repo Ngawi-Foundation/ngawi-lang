@@ -723,6 +723,20 @@ static Stmt *parse_statement(Parser *p) {
 
   Token t = p->cur;
   Expr *e = parse_expression(p);
+
+  if (check(p, TOK_ASSIGN) && e->kind == EXPR_INDEX) {
+    advance(p);  // consume '='
+    Expr *rhs = parse_expression(p);
+    consume(p, TOK_SEMI, "expected ';' after indexed assignment");
+
+    Stmt *s = new_stmt(STMT_INDEX_ASSIGN, t.line, t.col);
+    s->as.index_assign.target = e->as.index.target;
+    s->as.index_assign.index = e->as.index.index;
+    s->as.index_assign.value = rhs;
+    free(e);
+    return s;
+  }
+
   consume(p, TOK_SEMI, "expected ';' after expression");
   Stmt *s = new_stmt(STMT_EXPR, t.line, t.col);
   s->as.expr_stmt.expr = e;
@@ -854,6 +868,11 @@ static void stmt_free(Stmt *s) {
     case STMT_ASSIGN:
       free(s->as.assign.name);
       expr_free(s->as.assign.value);
+      break;
+    case STMT_INDEX_ASSIGN:
+      expr_free(s->as.index_assign.target);
+      expr_free(s->as.index_assign.index);
+      expr_free(s->as.index_assign.value);
       break;
     case STMT_EXPR:
       expr_free(s->as.expr_stmt.expr);

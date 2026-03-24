@@ -435,6 +435,7 @@ static void test_array_mvp(void) {
   const char *ok_src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2, 3];\n"
+      "  a[1] = 99;\n"
       "  let x: int = a[1];\n"
       "  let n: int = len(a);\n"
       "  print(x, n);\n"
@@ -454,11 +455,20 @@ static void test_array_mvp(void) {
       "  return 0;\n"
       "}\n";
 
-  expect(run_program("array_ok.ngawi", ok_src, 0) == 0, "int array read/len should pass");
+  const char *bad_write_src =
+      "fn main() -> int {\n"
+      "  let a: int[] = [1, 2];\n"
+      "  a[0] = true;\n"
+      "  return 0;\n"
+      "}\n";
+
+  expect(run_program("array_ok.ngawi", ok_src, 0) == 0, "int array read/write/len should pass");
   expect(run_program("array_bad_elem.ngawi", bad_elem_src, 1) != 0,
          "int array with non-int element should fail");
   expect(run_program("array_bad_index.ngawi", bad_index_src, 1) != 0,
          "array index must be int");
+  expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,
+         "int[] assignment expects int value");
 }
 
 static void test_missing_main(void) {
