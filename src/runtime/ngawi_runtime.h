@@ -9,6 +9,21 @@ typedef struct ng_int_array_t {
   int64_t len;
 } ng_int_array_t;
 
+typedef struct ng_float_array_t {
+  double *data;
+  int64_t len;
+} ng_float_array_t;
+
+typedef struct ng_bool_array_t {
+  bool *data;
+  int64_t len;
+} ng_bool_array_t;
+
+typedef struct ng_string_array_t {
+  const char **data;
+  int64_t len;
+} ng_string_array_t;
+
 void ng_print_int(int64_t v);
 void ng_print_float(double v);
 void ng_print_bool(bool v);

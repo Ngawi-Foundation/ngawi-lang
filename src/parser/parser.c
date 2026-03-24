@@ -126,9 +126,27 @@ static TypeKind parse_type(Parser *p) {
     }
     return TYPE_INT;
   }
-  if (match(p, TOK_KW_FLOAT) || match(p, TOK_KW_RUSDI)) return TYPE_FLOAT;
-  if (match(p, TOK_KW_BOOL) || match(p, TOK_KW_FUAD)) return TYPE_BOOL;
-  if (match(p, TOK_KW_STRING) || match(p, TOK_KW_IMUT)) return TYPE_STRING;
+  if (match(p, TOK_KW_FLOAT) || match(p, TOK_KW_RUSDI)) {
+    if (match(p, TOK_LBRACKET)) {
+      consume(p, TOK_RBRACKET, "expected ']' in array type");
+      return TYPE_FLOAT_ARRAY;
+    }
+    return TYPE_FLOAT;
+  }
+  if (match(p, TOK_KW_BOOL) || match(p, TOK_KW_FUAD)) {
+    if (match(p, TOK_LBRACKET)) {
+      consume(p, TOK_RBRACKET, "expected ']' in array type");
+      return TYPE_BOOL_ARRAY;
+    }
+    return TYPE_BOOL;
+  }
+  if (match(p, TOK_KW_STRING) || match(p, TOK_KW_IMUT)) {
+    if (match(p, TOK_LBRACKET)) {
+      consume(p, TOK_RBRACKET, "expected ']' in array type");
+      return TYPE_STRING_ARRAY;
+    }
+    return TYPE_STRING;
+  }
   if (match(p, TOK_KW_VOID)) return TYPE_VOID;
   parse_error(p, "expected type");
   return TYPE_VOID;

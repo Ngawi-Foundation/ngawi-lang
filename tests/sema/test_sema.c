@@ -435,16 +435,28 @@ static void test_array_mvp(void) {
   const char *ok_src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2, 3];\n"
+      "  let f: float[] = [1.5, 2.5];\n"
+      "  let b: bool[] = [true, false];\n"
+      "  let s: string[] = [\"a\", \"b\"];\n"
       "  a[1] = 99;\n"
       "  let x: int = a[1];\n"
+      "  let y: float = f[0];\n"
+      "  let z: bool = b[1];\n"
+      "  let t: string = s[1];\n"
       "  let n: int = len(a);\n"
-      "  print(x, n);\n"
+      "  print(x, y, z, t, n);\n"
       "  return 0;\n"
       "}\n";
 
   const char *bad_elem_src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, true];\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_mixed_src =
+      "fn main() -> int {\n"
+      "  let f: float[] = [1.0, 2];\n"
       "  return 0;\n"
       "}\n";
 
@@ -462,9 +474,12 @@ static void test_array_mvp(void) {
       "  return 0;\n"
       "}\n";
 
-  expect(run_program("array_ok.ngawi", ok_src, 0) == 0, "int array read/write/len should pass");
+  expect(run_program("array_ok.ngawi", ok_src, 0) == 0,
+         "scalar arrays read/write/index/len should pass");
   expect(run_program("array_bad_elem.ngawi", bad_elem_src, 1) != 0,
          "int array with non-int element should fail");
+  expect(run_program("array_bad_mixed.ngawi", bad_mixed_src, 1) != 0,
+         "float array with int element should fail");
   expect(run_program("array_bad_index.ngawi", bad_index_src, 1) != 0,
          "array index must be int");
   expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,

@@ -277,6 +277,9 @@ static void test_parse_int_array(void) {
   const char *src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2, 3];\n"
+      "  let f: float[] = [1.0, 2.5];\n"
+      "  let b: bool[] = [true, false];\n"
+      "  let s: string[] = [\"a\", \"b\"];\n"
       "  a[1] = 9;\n"
       "  let x: int = a[1];\n"
       "  return x;\n"
@@ -284,7 +287,7 @@ static void test_parse_int_array(void) {
 
   int had_error = 0;
   Program *p = parse_program("arr.ngawi", src, &had_error);
-  expect(had_error == 0, "int array parse should succeed");
+  expect(had_error == 0, "array parse should succeed");
   expect(p != NULL, "array program not null");
   expect(p->func_count == 1, "array one function expected");
   program_free(p);

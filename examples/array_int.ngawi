@@ -1,8 +1,17 @@
 fn main() -> amba {
   muwani a: amba[] = [10, 20, 30];
+  muwani f: rusdi[] = [1.5, 2.5];
+  muwani b: fuad[] = [true, false];
+  muwani s: imut[] = ["aa", "bb"];
+
   a[1] = 99;
+
   muwani x: amba = a[1];
+  muwani y: rusdi = f[0];
+  muwani z: fuad = b[1];
+  muwani t: imut = s[1];
   muwani n: amba = len(a);
-  print(x, n);
+
+  print(x, y, z, t, n);
   return 0;
 }

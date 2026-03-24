@@ -46,6 +46,9 @@ const char *type_kind_name(TypeKind t) {
     case TYPE_BOOL: return "bool";
     case TYPE_STRING: return "string";
     case TYPE_INT_ARRAY: return "int[]";
+    case TYPE_FLOAT_ARRAY: return "float[]";
+    case TYPE_BOOL_ARRAY: return "bool[]";
+    case TYPE_STRING_ARRAY: return "string[]";
     case TYPE_VOID: return "void";
     default: return "<unknown>";
   }
@@ -54,6 +57,31 @@ const char *type_kind_name(TypeKind t) {
 int type_is_numeric(TypeKind t) { return t == TYPE_INT || t == TYPE_FLOAT; }
 
 static int type_eq(TypeKind a, TypeKind b) { return a == b; }
+
+static int type_is_array(TypeKind t) {
+  return t == TYPE_INT_ARRAY || t == TYPE_FLOAT_ARRAY || t == TYPE_BOOL_ARRAY ||
+         t == TYPE_STRING_ARRAY;
+}
+
+static TypeKind array_of_scalar(TypeKind t) {
+  switch (t) {
+    case TYPE_INT: return TYPE_INT_ARRAY;
+    case TYPE_FLOAT: return TYPE_FLOAT_ARRAY;
+    case TYPE_BOOL: return TYPE_BOOL_ARRAY;
+    case TYPE_STRING: return TYPE_STRING_ARRAY;
+    default: return TYPE_VOID;
+  }
+}
+
+static TypeKind array_elem_type(TypeKind t) {
+  switch (t) {
+    case TYPE_INT_ARRAY: return TYPE_INT;
+    case TYPE_FLOAT_ARRAY: return TYPE_FLOAT;
+    case TYPE_BOOL_ARRAY: return TYPE_BOOL;
+    case TYPE_STRING_ARRAY: return TYPE_STRING;
+    default: return TYPE_VOID;
+  }
+}
 
 static int min3(int a, int b, int c) {
   int m = a < b ? a : b;
@@ -295,8 +323,8 @@ static TypeKind check_call(Sema *s, Expr *e) {
     }
     TypeKind at = check_expr(s, e->as.call.args[0]);
     if (at == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
-    if (!type_eq(at, TYPE_STRING) && !type_eq(at, TYPE_INT_ARRAY)) {
-      sema_error(s, e->line, e->col, "len expects string or int[], got '%s'", type_kind_name(at));
+    if (!type_eq(at, TYPE_STRING) && !type_is_array(at)) {
+      sema_error(s, e->line, e->col, "len expects string or array, got '%s'", type_kind_name(at));
       return set_expr_type(e, TYPE_VOID);
     }
     return set_expr_type(e, TYPE_INT);
@@ -456,22 +484,43 @@ static TypeKind check_expr(Sema *s, Expr *e) {
         sema_error(s, e->line, e->col, "empty array literal is not supported yet");
         return set_expr_type(e, TYPE_VOID);
       }
+
+      TypeKind elem_t = TYPE_VOID;
       for (size_t i = 0; i < e->as.array_lit.count; i++) {
         TypeKind it = check_expr(s, e->as.array_lit.items[i]);
         if (it == TYPE_VOID) continue;
-        if (!type_eq(it, TYPE_INT)) {
+
+        if (type_is_array(it)) {
           sema_error(s, e->as.array_lit.items[i]->line, e->as.array_lit.items[i]->col,
-                     "int[] literal expects int elements, got '%s'", type_kind_name(it));
+                     "nested arrays are not supported yet");
+          continue;
+        }
+
+        if (elem_t == TYPE_VOID) {
+          elem_t = it;
+          continue;
+        }
+
+        if (!type_eq(it, elem_t)) {
+          sema_error(s, e->as.array_lit.items[i]->line, e->as.array_lit.items[i]->col,
+                     "array literal expects '%s' elements, got '%s'", type_kind_name(elem_t),
+                     type_kind_name(it));
         }
       }
-      return set_expr_type(e, TYPE_INT_ARRAY);
+
+      TypeKind arr_t = array_of_scalar(elem_t);
+      if (arr_t == TYPE_VOID) {
+        sema_error(s, e->line, e->col, "array literal element type is not supported");
+        return set_expr_type(e, TYPE_VOID);
+      }
+      return set_expr_type(e, arr_t);
     }
     case EXPR_INDEX: {
       TypeKind tt = check_expr(s, e->as.index.target);
       TypeKind it = check_expr(s, e->as.index.index);
       if (tt == TYPE_VOID || it == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
-      if (!type_eq(tt, TYPE_INT_ARRAY)) {
-        sema_error(s, e->line, e->col, "indexing expects int[] target, got '%s'",
+      if (!type_is_array(tt)) {
+        sema_error(s, e->line, e->col, "indexing expects array target, got '%s'",
                    type_kind_name(tt));
         return set_expr_type(e, TYPE_VOID);
       }
@@ -479,7 +528,7 @@ static TypeKind check_expr(Sema *s, Expr *e) {
         sema_error(s, e->line, e->col, "array index must be int, got '%s'", type_kind_name(it));
         return set_expr_type(e, TYPE_VOID);
       }
-      return set_expr_type(e, TYPE_INT);
+      return set_expr_type(e, array_elem_type(tt));
     }
     case EXPR_CALL:
       return check_call(s, e);
@@ -666,16 +715,18 @@ static void check_stmt(Sema *s, Stmt *st) {
       TypeKind it = check_expr(s, st->as.index_assign.index);
       TypeKind vt = check_expr(s, st->as.index_assign.value);
 
-      if (tt != TYPE_VOID && !type_eq(tt, TYPE_INT_ARRAY)) {
-        sema_error(s, st->line, st->col, "indexed assignment expects int[] target, got '%s'",
+      if (tt != TYPE_VOID && !type_is_array(tt)) {
+        sema_error(s, st->line, st->col, "indexed assignment expects array target, got '%s'",
                    type_kind_name(tt));
       }
       if (it != TYPE_VOID && !type_eq(it, TYPE_INT)) {
         sema_error(s, st->line, st->col, "array index must be int, got '%s'", type_kind_name(it));
       }
-      if (vt != TYPE_VOID && !type_eq(vt, TYPE_INT)) {
-        sema_error(s, st->line, st->col, "int[] assignment expects int value, got '%s'",
-                   type_kind_name(vt));
+
+      TypeKind elem_t = array_elem_type(tt);
+      if (elem_t != TYPE_VOID && vt != TYPE_VOID && !type_eq(elem_t, vt)) {
+        sema_error(s, st->line, st->col, "%s assignment expects %s value, got '%s'",
+                   type_kind_name(tt), type_kind_name(elem_t), type_kind_name(vt));
       }
       break;
     }

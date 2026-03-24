@@ -10,6 +10,9 @@ typedef enum TypeKind {
   TYPE_BOOL,
   TYPE_STRING,
   TYPE_INT_ARRAY,
+  TYPE_FLOAT_ARRAY,
+  TYPE_BOOL_ARRAY,
+  TYPE_STRING_ARRAY,
   TYPE_VOID,
 } TypeKind;
 

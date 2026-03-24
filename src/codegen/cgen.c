@@ -33,9 +33,17 @@ static const char *c_type(TypeKind t) {
     case TYPE_BOOL: return "bool";
     case TYPE_STRING: return "const char *";
     case TYPE_INT_ARRAY: return "ng_int_array_t";
+    case TYPE_FLOAT_ARRAY: return "ng_float_array_t";
+    case TYPE_BOOL_ARRAY: return "ng_bool_array_t";
+    case TYPE_STRING_ARRAY: return "ng_string_array_t";
     case TYPE_VOID: return "void";
     default: return "void";
   }
+}
+
+static int cgen_type_is_array(TypeKind t) {
+  return t == TYPE_INT_ARRAY || t == TYPE_FLOAT_ARRAY || t == TYPE_BOOL_ARRAY ||
+         t == TYPE_STRING_ARRAY;
 }
 
 static const char *op_text(int op) {
@@ -139,14 +147,32 @@ static void emit_expr(CGen *g, Expr *e) {
     case EXPR_IDENT:
       emit(g, e->as.ident_name);
       break;
-    case EXPR_ARRAY_LITERAL:
-      emit(g, "(ng_int_array_t){.data=(int64_t[]){");
+    case EXPR_ARRAY_LITERAL: {
+      const char *arr_type = "ng_int_array_t";
+      const char *elem_type = "int64_t";
+      if (e->inferred_type == TYPE_FLOAT_ARRAY) {
+        arr_type = "ng_float_array_t";
+        elem_type = "double";
+      } else if (e->inferred_type == TYPE_BOOL_ARRAY) {
+        arr_type = "ng_bool_array_t";
+        elem_type = "bool";
+      } else if (e->inferred_type == TYPE_STRING_ARRAY) {
+        arr_type = "ng_string_array_t";
+        elem_type = "const char *";
+      }
+
+      emit(g, "(");
+      emit(g, arr_type);
+      emit(g, "){.data=(");
+      emit(g, elem_type);
+      emit(g, "[]){");
       for (size_t i = 0; i < e->as.array_lit.count; i++) {
         if (i > 0) emit(g, ", ");
         emit_expr(g, e->as.array_lit.items[i]);
       }
       emitf(g, "}, .len=%lld}", (long long)e->as.array_lit.count);
       break;
+    }
     case EXPR_INDEX:
       emit(g, "((");
       emit_expr(g, e->as.index.target);
@@ -212,7 +238,7 @@ static void emit_expr(CGen *g, Expr *e) {
       }
       if (strcmp(e->as.call.name, "len") == 0 && e->as.call.arg_count == 1) {
         Expr *arg = e->as.call.args[0];
-        if (arg->inferred_type == TYPE_INT_ARRAY) {
+        if (cgen_type_is_array(arg->inferred_type)) {
           emit(g, "((");
           emit_expr(g, arg);
           emit(g, ").len)");
