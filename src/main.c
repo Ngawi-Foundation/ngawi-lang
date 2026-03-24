@@ -23,7 +23,9 @@ typedef struct StrBuf {
 } StrBuf;
 
 static void print_usage(void) {
-  puts("Usage: ngawic build <input.ngawi> [-o output] [-S]");
+  puts("Usage:");
+  puts("  ngawic build <input.ngawi> [-o output] [-S]");
+  puts("  ngawic check <input.ngawi>");
 }
 
 static bool has_ngawi_ext(const char *path) {
@@ -361,7 +363,15 @@ static char *load_source_with_imports(const char *input) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 3 || strcmp(argv[1], "build") != 0) {
+  if (argc < 3) {
+    print_usage();
+    return 1;
+  }
+
+  const char *mode = argv[1];
+  int is_build = strcmp(mode, "build") == 0;
+  int is_check = strcmp(mode, "check") == 0;
+  if (!is_build && !is_check) {
     print_usage();
     return 1;
   }
@@ -371,16 +381,16 @@ int main(int argc, char **argv) {
   bool emit_c_only = false;
 
   for (int i = 3; i < argc; i++) {
-    if (strcmp(argv[i], "-o") == 0) {
+    if (is_build && strcmp(argv[i], "-o") == 0) {
       if (i + 1 >= argc) {
         diag_error("<cli>", 1, 1, "missing value for -o");
         return 1;
       }
       output = argv[++i];
-    } else if (strcmp(argv[i], "-S") == 0) {
+    } else if (is_build && strcmp(argv[i], "-S") == 0) {
       emit_c_only = true;
     } else {
-      diag_error("<cli>", 1, 1, "unknown flag: %s", argv[i]);
+      diag_error("<cli>", 1, 1, "unknown flag for %s: %s", mode, argv[i]);
       return 1;
     }
   }
@@ -405,6 +415,13 @@ int main(int argc, char **argv) {
     program_free(program);
     free(source);
     return 1;
+  }
+
+  if (is_check) {
+    printf("Check passed: %s\n", input);
+    program_free(program);
+    free(source);
+    return 0;
   }
 
   int exit_code = 0;
