@@ -47,12 +47,6 @@ make debug
 
 Command writes `hello.c`. Generated C uses runtime helpers from `src/runtime/ngawi_runtime.h` and `src/runtime/ngawi_runtime.c`.
 
-## Check only (parse + sema)
-
-```bash
-./ngawic check examples/hello.ngawi
-```
-
 ## Tests
 
 ```bash

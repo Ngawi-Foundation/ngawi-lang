@@ -13,7 +13,7 @@ make test
 - `tests/lexer` for tokenization
 - `tests/parser` for grammar and recovery
 - `tests/sema` for type and scope rules
-- `tests/e2e` for compile + run behavior, runtime-failure checks, and `ngawic check` command coverage
+- `tests/e2e` for compile + run behavior, including import success/failure cases
 - `tests/golden` for C11 output stability
 
 ## Golden workflow
