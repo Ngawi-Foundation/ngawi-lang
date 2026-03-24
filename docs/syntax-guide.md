@@ -110,6 +110,7 @@ i--;
 
 ```ngawi
 let a: int[] = [1, 2, 3];
+a[1] = 9;
 let x: int = a[1];
 let n: int = len(a);
 ```

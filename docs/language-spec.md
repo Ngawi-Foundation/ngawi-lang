@@ -80,6 +80,7 @@ Supported statements:
 - top-level import directive: `import "file.ngawi";`
 - variable declaration (`let`, `const`)
 - assignment
+- indexed assignment (`a[i] = v`) for `int[]`
 - compound assignment (`+=`, `-=`, `*=`, `/=`, `%=`)
 - postfix increment/decrement (`x++;`, `x--;`)
 - expression statement
