@@ -10,7 +10,7 @@ This roadmap tracks near-term language work.
 
 ## Planned language features
 
-- arrays: richer nested array model beyond current `int[][]` MVP
+- arrays: richer multidimensional model beyond current 2D scalar-array MVP
 - structs
 - pattern guards for `match` (evaluation)
 - optional semicolon mode (evaluation)

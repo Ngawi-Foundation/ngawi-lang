@@ -124,7 +124,7 @@ a = push(a, 10);
 a = pop(a);
 ```
 
-Current MVP supports scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`) and nested `int[][]`.
+Current MVP supports scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`) and nested scalar arrays (`int[][]`, `float[][]`, `bool[][]`, `string[][]`).
 Empty array literal is supported only with explicit type context, for example:
 `let a: int[] = [];`
 Array indexing performs runtime bounds checks.
