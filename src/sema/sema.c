@@ -111,6 +111,14 @@ static void maybe_note_array_depth_mismatch(Sema *s,
             ng_type_array_depth(expected), ng_type_array_depth(got));
 }
 
+static void maybe_note_index_depth_context(Sema *s, int line, int col, TypeKind target_type) {
+  if (type_is_array(target_type)) {
+    sema_note(s, line, col, "indexed value has array depth %d", ng_type_array_depth(target_type));
+  } else {
+    sema_note(s, line, col, "indexed value has array depth 0 (non-array)");
+  }
+}
+
 static int min3(int a, int b, int c) {
   int m = a < b ? a : b;
   return m < c ? m : c;
@@ -583,10 +591,12 @@ static TypeKind check_expr(Sema *s, Expr *e) {
       if (!type_is_array(tt)) {
         sema_error(s, e->line, e->col, "indexing expects array target, got '%s'",
                    type_kind_name(tt));
+        maybe_note_index_depth_context(s, e->line, e->col, tt);
         return set_expr_type(e, TYPE_VOID);
       }
       if (!type_eq(it, TYPE_INT)) {
         sema_error(s, e->line, e->col, "array index must be int, got '%s'", type_kind_name(it));
+        sema_note(s, e->line, e->col, "index expressions are currently 0-based int offsets");
         return set_expr_type(e, TYPE_VOID);
       }
       return set_expr_type(e, array_elem_type(tt));
@@ -822,6 +832,7 @@ static void check_stmt(Sema *s, Stmt *st) {
       if (tt != TYPE_VOID && !type_is_array(tt)) {
         sema_error(s, st->line, st->col, "indexed assignment expects array target, got '%s'",
                    type_kind_name(tt));
+        maybe_note_index_depth_context(s, st->line, st->col, tt);
       }
       if (it != TYPE_VOID && !type_eq(it, TYPE_INT)) {
         sema_error(s, st->line, st->col, "array index must be int, got '%s'", type_kind_name(it));

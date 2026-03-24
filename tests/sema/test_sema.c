@@ -513,6 +513,13 @@ static void test_array_mvp(void) {
       "  return 0;\n"
       "}\n";
 
+  const char *bad_over_index_src =
+      "fn main() -> int {\n"
+      "  let m: int[][] = [[1, 2], [3, 4]];\n"
+      "  let x = m[0][0][0];\n"
+      "  return 0;\n"
+      "}\n";
+
   const char *bad_index_src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2];\n"
@@ -557,6 +564,8 @@ static void test_array_mvp(void) {
          "indexed assignment target must be array variable");
   expect(run_program("array_bad_const_index_assign.ngawi", bad_const_index_assign_src, 1) != 0,
          "const array should reject indexed assignment");
+  expect(run_program("array_bad_over_index.ngawi", bad_over_index_src, 1) != 0,
+         "indexing beyond array depth should fail sema");
   expect(run_program("array_bad_index.ngawi", bad_index_src, 1) != 0,
          "array index must be int");
   expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,
