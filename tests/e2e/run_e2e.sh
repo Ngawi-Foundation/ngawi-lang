@@ -98,5 +98,6 @@ run_runtime_fail_case examples/array_pop_empty.ngawi e2e_array_pop_empty
 run_fail_case examples/import_cycle_main.ngawi e2e_import_cycle
 run_fail_case examples/import_missing_main.ngawi e2e_import_missing
 run_fail_case examples/import_bad_syntax_main.ngawi e2e_import_bad_syntax
+run_fail_case examples/import_after_fn_main.ngawi e2e_import_after_fn
 
 echo "All e2e tests passed"

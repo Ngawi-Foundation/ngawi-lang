@@ -310,6 +310,22 @@ static void test_parse_import_not_allowed_in_block(void) {
   program_free(p);
 }
 
+static void test_parse_import_after_function_is_invalid(void) {
+  const char *src =
+      "fn first() -> int {\n"
+      "  return 0;\n"
+      "}\n"
+      "import \"x.ngawi\";\n"
+      "fn main() -> int {\n"
+      "  return 0;\n"
+      "}\n";
+
+  int had_error = 0;
+  Program *p = parse_program_maybe_quiet("import_after_fn.ngawi", src, &had_error, 1);
+  expect(had_error != 0, "import after function should fail parse");
+  program_free(p);
+}
+
 static void test_parse_invalid_import_syntax(void) {
   const char *src =
       "import lib.ngawi;\n"
@@ -356,6 +372,7 @@ int main(void) {
   test_parse_import_toplevel();
   test_parse_int_array();
   test_parse_import_not_allowed_in_block();
+  test_parse_import_after_function_is_invalid();
   test_parse_invalid_import_syntax();
   test_parse_recovery_keeps_following_functions();
 

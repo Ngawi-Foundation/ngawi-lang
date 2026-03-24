@@ -1,0 +1,9 @@
+fn helper() -> amba {
+  return 1;
+}
+
+import "imports/math_base.ngawi";
+
+fn main() -> amba {
+  return helper();
+}

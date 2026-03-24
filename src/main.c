@@ -180,6 +180,31 @@ static int str_list_index_of(const StrList *list, const char *value) {
   return -1;
 }
 
+static int is_import_line_text(const char *line, size_t len) {
+  size_t i = 0;
+  while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
+
+  const char kw[] = "import";
+  size_t kw_len = sizeof(kw) - 1;
+  if (i + kw_len > len || strncmp(line + i, kw, kw_len) != 0) return 0;
+  i += kw_len;
+
+  while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
+  if (i >= len || line[i] != '"') return 0;
+  i++;
+
+  while (i < len && line[i] != '"') i++;
+  if (i >= len) return 0;
+  i++;
+
+  while (i < len && (line[i] == ' ' || line[i] == '\t')) i++;
+  if (i >= len || line[i] != ';') return 0;
+  i++;
+
+  while (i < len && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++;
+  return i == len;
+}
+
 static void diag_import_context(const char *importer_file,
                                 int importer_line,
                                 const char *target_text) {
@@ -301,15 +326,37 @@ static int load_module_recursive(const char *path,
     }
   }
 
-  if (!str_buf_append_n(out_source, source, strlen(source))) {
-    diag_error(canon, 1, 1, "out of memory");
-    free(dir);
-    program_free(module_prog);
-    free(source);
-    char *p = str_list_pop(stack);
-    free(p);
-    return 1;
+  const char *cur = source;
+  while (*cur) {
+    const char *line_start = cur;
+    while (*cur && *cur != '\n') cur++;
+    const char *line_end = cur;
+    int has_newline = (*cur == '\n');
+    if (has_newline) cur++;
+
+    size_t line_len = (size_t)(line_end - line_start);
+    if (!is_import_line_text(line_start, line_len)) {
+      if (!str_buf_append_n(out_source, line_start, line_len)) {
+        diag_error(canon, 1, 1, "out of memory");
+        free(dir);
+        program_free(module_prog);
+        free(source);
+        char *p = str_list_pop(stack);
+        free(p);
+        return 1;
+      }
+      if (has_newline && !str_buf_append_n(out_source, "\n", 1)) {
+        diag_error(canon, 1, 1, "out of memory");
+        free(dir);
+        program_free(module_prog);
+        free(source);
+        char *p = str_list_pop(stack);
+        free(p);
+        return 1;
+      }
+    }
   }
+
   if (out_source->len > 0 && out_source->data[out_source->len - 1] != '\n') {
     if (!str_buf_append_n(out_source, "\n", 1)) {
       diag_error(canon, 1, 1, "out of memory");

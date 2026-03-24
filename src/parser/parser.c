@@ -839,8 +839,18 @@ Program *parse_program(const char *file, const char *source, int *had_error) {
   parser_init(&p, file, source);
 
   Program *prog = (Program *)xcalloc(1, sizeof(Program));
+  int seen_function = 0;
   while (!check(&p, TOK_EOF) && !p.stop_parsing) {
     if (check(&p, TOK_KW_IMPORT)) {
+      if (seen_function) {
+        parse_error(&p, "import declarations must appear before function declarations");
+        advance(&p);
+        if (check(&p, TOK_STRING_LIT)) advance(&p);
+        if (check(&p, TOK_SEMI)) advance(&p);
+        if (p.panic_mode) synchronize(&p);
+        continue;
+      }
+
       ImportDecl imp = parse_import_decl(&p);
       prog->imports = (ImportDecl *)xrealloc(prog->imports, prog->import_count + 1,
                                              sizeof(ImportDecl));
@@ -855,6 +865,7 @@ Program *parse_program(const char *file, const char *source, int *had_error) {
       continue;
     }
 
+    seen_function = 1;
     FunctionDecl fn = parse_function(&p);
     prog->funcs = (FunctionDecl *)xrealloc(prog->funcs, prog->func_count + 1,
                                            sizeof(FunctionDecl));
