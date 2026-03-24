@@ -90,6 +90,7 @@ run_case examples/string_alloc_stress.ngawi e2e_string_alloc_stress "40 true tru
 run_case examples/array_int.ngawi e2e_array_int "99 1.5 false cc 3"
 run_case examples/array_nested.ngawi e2e_array_nested "10 5 42 3.5 true k 3"
 run_case examples/array_empty.ngawi e2e_array_empty "0"
+run_case examples/array_push_stress.ngawi e2e_array_push_stress "1000 1 499"
 run_case examples/import_main.ngawi e2e_import "7"
 run_case examples/import_nested_main.ngawi e2e_import_nested "7"
 run_case examples/import_duplicate_main.ngawi e2e_import_dup "18"

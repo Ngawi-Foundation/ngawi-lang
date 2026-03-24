@@ -1,0 +1,13 @@
+fn main() -> amba {
+  muwani a: amba[] = [1];
+  muwani i: amba = 0;
+
+  while (i < 1000) {
+    a = push(a, i);
+    i += 1;
+  }
+
+  a = pop(a);
+  print(len(a), a[0], a[500]);
+  return 0;
+}
