@@ -15,11 +15,11 @@ int main(void)
   a = ng_int_array_push(a, 40);
   a = ng_int_array_pop(a);
   s = ng_string_array_push(s, "cc");
-  (a).data[ng_array_checked_index((int64_t)(1), ((a).len))] = 99;
-  int64_t x = ((a).data[ng_array_checked_index((int64_t)(1), ((a).len))]);
-  double y = ((f).data[ng_array_checked_index((int64_t)(0), ((f).len))]);
-  bool z = ((b).data[ng_array_checked_index((int64_t)(1), ((b).len))]);
-  const char * t = ((s).data[ng_array_checked_index((int64_t)(2), ((s).len))]);
+  ng_int_array_set(&a, (int64_t)(1), 99);
+  int64_t x = ng_int_array_get(a, (int64_t)(1));
+  double y = ng_float_array_get(f, (int64_t)(0));
+  bool z = ng_bool_array_get(b, (int64_t)(1));
+  const char * t = ng_string_array_get(s, (int64_t)(2));
   int64_t n = ((a).len);
   ng_print_int(x);
   ng_print_string(" ");

@@ -174,13 +174,19 @@ static void emit_expr(CGen *g, Expr *e) {
       break;
     }
     case EXPR_INDEX:
-      emit(g, "((");
+      if (e->inferred_type == TYPE_INT) {
+        emit(g, "ng_int_array_get(");
+      } else if (e->inferred_type == TYPE_FLOAT) {
+        emit(g, "ng_float_array_get(");
+      } else if (e->inferred_type == TYPE_BOOL) {
+        emit(g, "ng_bool_array_get(");
+      } else {
+        emit(g, "ng_string_array_get(");
+      }
       emit_expr(g, e->as.index.target);
-      emit(g, ").data[ng_array_checked_index((int64_t)(");
+      emit(g, ", (int64_t)(");
       emit_expr(g, e->as.index.index);
-      emit(g, "), ((");
-      emit_expr(g, e->as.index.target);
-      emit(g, ").len))])");
+      emit(g, "))");
       break;
     case EXPR_UNARY:
       emit(g, "(");
@@ -370,14 +376,25 @@ static void emit_for_clause_stmt(CGen *g, Stmt *st) {
       break;
 
     case STMT_INDEX_ASSIGN:
-      emit(g, "(");
-      emit_expr(g, st->as.index_assign.target);
-      emit(g, ").data[ng_array_checked_index((int64_t)(");
+      if (st->as.index_assign.target->kind != EXPR_IDENT) {
+        emit(g, "/* invalid indexed assignment target */");
+        break;
+      }
+      if (st->as.index_assign.value->inferred_type == TYPE_INT) {
+        emit(g, "ng_int_array_set(&");
+      } else if (st->as.index_assign.value->inferred_type == TYPE_FLOAT) {
+        emit(g, "ng_float_array_set(&");
+      } else if (st->as.index_assign.value->inferred_type == TYPE_BOOL) {
+        emit(g, "ng_bool_array_set(&");
+      } else {
+        emit(g, "ng_string_array_set(&");
+      }
+      emit(g, st->as.index_assign.target->as.ident_name);
+      emit(g, ", (int64_t)(");
       emit_expr(g, st->as.index_assign.index);
-      emit(g, "), ((");
-      emit_expr(g, st->as.index_assign.target);
-      emit(g, ").len))] = ");
+      emit(g, "), ");
       emit_expr(g, st->as.index_assign.value);
+      emit(g, ")");
       break;
 
     case STMT_EXPR:
@@ -417,14 +434,7 @@ static void emit_stmt(CGen *g, Stmt *st) {
 
     case STMT_INDEX_ASSIGN:
       emit_indent(g);
-      emit(g, "(");
-      emit_expr(g, st->as.index_assign.target);
-      emit(g, ").data[ng_array_checked_index((int64_t)(");
-      emit_expr(g, st->as.index_assign.index);
-      emit(g, "), ((");
-      emit_expr(g, st->as.index_assign.target);
-      emit(g, ").len))] = ");
-      emit_expr(g, st->as.index_assign.value);
+      emit_for_clause_stmt(g, st);
       emit(g, ";\n");
       break;
 

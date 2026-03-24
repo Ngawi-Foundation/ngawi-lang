@@ -470,6 +470,20 @@ static void test_array_mvp(void) {
       "  return 0;\n"
       "}\n";
 
+  const char *bad_index_target_src =
+      "fn main() -> int {\n"
+      "  let a: int[] = [1, 2];\n"
+      "  push(a, 3)[0] = 9;\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_const_index_assign_src =
+      "fn main() -> int {\n"
+      "  const a: int[] = [1, 2];\n"
+      "  a[0] = 9;\n"
+      "  return 0;\n"
+      "}\n";
+
   const char *bad_index_src =
       "fn main() -> int {\n"
       "  let a: int[] = [1, 2];\n"
@@ -506,6 +520,10 @@ static void test_array_mvp(void) {
          "float array with int element should fail");
   expect(run_program("array_bad_push.ngawi", bad_push_src, 1) != 0,
          "push should enforce element type");
+  expect(run_program("array_bad_index_target.ngawi", bad_index_target_src, 1) != 0,
+         "indexed assignment target must be array variable");
+  expect(run_program("array_bad_const_index_assign.ngawi", bad_const_index_assign_src, 1) != 0,
+         "const array should reject indexed assignment");
   expect(run_program("array_bad_index.ngawi", bad_index_src, 1) != 0,
          "array index must be int");
   expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,

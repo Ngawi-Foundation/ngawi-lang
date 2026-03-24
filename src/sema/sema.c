@@ -774,6 +774,17 @@ static void check_stmt(Sema *s, Stmt *st) {
       TypeKind it = check_expr(s, st->as.index_assign.index);
       TypeKind vt = check_expr(s, st->as.index_assign.value);
 
+      if (st->as.index_assign.target->kind != EXPR_IDENT) {
+        sema_error(s, st->line, st->col,
+                   "indexed assignment target must be an array variable identifier");
+      } else {
+        VarSymbol *v = lookup_var(s, st->as.index_assign.target->as.ident_name);
+        if (v && v->is_const) {
+          sema_error(s, st->line, st->col, "cannot assign through const variable '%s'",
+                     st->as.index_assign.target->as.ident_name);
+        }
+      }
+
       if (tt != TYPE_VOID && !type_is_array(tt)) {
         sema_error(s, st->line, st->col, "indexed assignment expects array target, got '%s'",
                    type_kind_name(tt));

@@ -71,6 +71,38 @@ int64_t ng_array_checked_index(int64_t index, int64_t len) {
   return index;
 }
 
+int64_t ng_int_array_get(ng_int_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
+double ng_float_array_get(ng_float_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
+bool ng_bool_array_get(ng_bool_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
+const char *ng_string_array_get(ng_string_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
+void ng_int_array_set(ng_int_array_t *arr, int64_t index, int64_t value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
+void ng_float_array_set(ng_float_array_t *arr, int64_t index, double value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
+void ng_bool_array_set(ng_bool_array_t *arr, int64_t index, bool value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
+void ng_string_array_set(ng_string_array_t *arr, int64_t index, const char *value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
 ng_int_array_t ng_int_array_push(ng_int_array_t arr, int64_t value) {
   int64_t new_len = arr.len + 1;
   int64_t *out = (int64_t *)ng_runtime_alloc((size_t)new_len * sizeof(int64_t));
