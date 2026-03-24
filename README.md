@@ -12,7 +12,7 @@ Do not treat current output as production stable.
 Current language surface:
 
 - control flow: `if/elif/else`, `while`, `for`, `match` (int+bool+string MVP), `break`, `continue`
-- arrays (MVP): scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`) with literals, indexing, indexed assignment, and `len(array)`
+- arrays (MVP): scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`) with literals, indexing, indexed assignment, `len(array)`, `push`, and `pop`
 - operators: arithmetic, comparison, logical, compound assignment, postfix `++`/`--`
 - strings: equality by value, concatenation with `+`, `len`, `contains`, `starts_with`, `ends_with`, `to_lower`, `to_upper`, `trim`
 - modules: top-level `import "file.ngawi";` with cycle detection

@@ -82,6 +82,7 @@ Supported statements:
 - assignment
 - indexed assignment (`a[i] = v`) for scalar arrays
 - empty array literal `[]` requires explicit array type context
+- `import` is top-level only (inside blocks is invalid)
 - compound assignment (`+=`, `-=`, `*=`, `/=`, `%=`)
 - postfix increment/decrement (`x++;`, `x--;`)
 - expression statement
@@ -200,6 +201,10 @@ Rules:
 
 - `len(s) -> int`
   - accepts `string` and scalar arrays
+- `push(arr, value) -> array`
+  - appends value and returns new array
+- `pop(arr) -> array`
+  - removes last value and returns new array
 - `contains(s, sub) -> bool`
 - `starts_with(s, prefix) -> bool`
 - `ends_with(s, suffix) -> bool`
@@ -210,6 +215,7 @@ Rules:
 All string helper arguments must be `string`.
 
 Runtime note: `to_lower` and string `+` create runtime-owned heap strings. Runtime frees them automatically at process exit.
+Array indexing uses runtime bounds checks and aborts on out-of-range access.
 
 ## 10. Diagnostics
 

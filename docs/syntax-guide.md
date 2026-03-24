@@ -120,11 +120,14 @@ let y: float = f[0];
 let z: bool = b[1];
 let t: string = s[1];
 let n: int = len(a);
+a = push(a, 10);
+a = pop(a);
 ```
 
 Current MVP supports scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`).
 Empty array literal is supported only with explicit type context, for example:
 `let a: int[] = [];`
+Array indexing performs runtime bounds checks.
 
 ## Operators
 
