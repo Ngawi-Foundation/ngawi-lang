@@ -207,6 +207,7 @@ Rules:
   - appends value and returns new array
 - `pop(arr) -> array`
   - removes last value and returns new array
+  - runtime error if called on an empty array
 - `contains(s, sub) -> bool`
 - `starts_with(s, prefix) -> bool`
 - `ends_with(s, suffix) -> bool`

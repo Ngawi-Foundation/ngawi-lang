@@ -124,6 +124,8 @@ a = push(a, 10);
 a = pop(a);
 ```
 
+`pop` on an empty array is a runtime error.
+
 Current MVP supports scalar arrays (`int[]`, `float[]`, `bool[]`, `string[]`) and nested scalar arrays (`int[][]`, `float[][]`, `bool[][]`, `string[][]`).
 Empty array literal is supported only with explicit type context, for example:
 `let a: int[] = [];`
