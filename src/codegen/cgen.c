@@ -35,8 +35,11 @@ static const char *c_type(TypeKind t) {
     case TYPE_INT_ARRAY: return "ng_int_array_t";
     case TYPE_INT2_ARRAY: return "ng_int2_array_t";
     case TYPE_FLOAT_ARRAY: return "ng_float_array_t";
+    case TYPE_FLOAT2_ARRAY: return "ng_float2_array_t";
     case TYPE_BOOL_ARRAY: return "ng_bool_array_t";
+    case TYPE_BOOL2_ARRAY: return "ng_bool2_array_t";
     case TYPE_STRING_ARRAY: return "ng_string_array_t";
+    case TYPE_STRING2_ARRAY: return "ng_string2_array_t";
     case TYPE_VOID: return "void";
     default: return "void";
   }
@@ -44,7 +47,8 @@ static const char *c_type(TypeKind t) {
 
 static int cgen_type_is_array(TypeKind t) {
   return t == TYPE_INT_ARRAY || t == TYPE_INT2_ARRAY || t == TYPE_FLOAT_ARRAY ||
-         t == TYPE_BOOL_ARRAY || t == TYPE_STRING_ARRAY;
+         t == TYPE_FLOAT2_ARRAY || t == TYPE_BOOL_ARRAY || t == TYPE_BOOL2_ARRAY ||
+         t == TYPE_STRING_ARRAY || t == TYPE_STRING2_ARRAY;
 }
 
 static const char *op_text(int op) {
@@ -157,12 +161,21 @@ static void emit_expr(CGen *g, Expr *e) {
       } else if (e->inferred_type == TYPE_FLOAT_ARRAY) {
         arr_type = "ng_float_array_t";
         elem_type = "double";
+      } else if (e->inferred_type == TYPE_FLOAT2_ARRAY) {
+        arr_type = "ng_float2_array_t";
+        elem_type = "ng_float_array_t";
       } else if (e->inferred_type == TYPE_BOOL_ARRAY) {
         arr_type = "ng_bool_array_t";
         elem_type = "bool";
+      } else if (e->inferred_type == TYPE_BOOL2_ARRAY) {
+        arr_type = "ng_bool2_array_t";
+        elem_type = "ng_bool_array_t";
       } else if (e->inferred_type == TYPE_STRING_ARRAY) {
         arr_type = "ng_string_array_t";
         elem_type = "const char *";
+      } else if (e->inferred_type == TYPE_STRING2_ARRAY) {
+        arr_type = "ng_string2_array_t";
+        elem_type = "ng_string_array_t";
       }
 
       emit(g, "(");
@@ -184,8 +197,14 @@ static void emit_expr(CGen *g, Expr *e) {
         emit(g, "ng_int2_array_get(");
       } else if (e->inferred_type == TYPE_FLOAT) {
         emit(g, "ng_float_array_get(");
+      } else if (e->inferred_type == TYPE_FLOAT_ARRAY) {
+        emit(g, "ng_float2_array_get(");
       } else if (e->inferred_type == TYPE_BOOL) {
         emit(g, "ng_bool_array_get(");
+      } else if (e->inferred_type == TYPE_BOOL_ARRAY) {
+        emit(g, "ng_bool2_array_get(");
+      } else if (e->inferred_type == TYPE_STRING_ARRAY) {
+        emit(g, "ng_string2_array_get(");
       } else {
         emit(g, "ng_string_array_get(");
       }
@@ -271,10 +290,16 @@ static void emit_expr(CGen *g, Expr *e) {
           emit(g, "ng_int2_array_push(");
         } else if (at == TYPE_FLOAT_ARRAY) {
           emit(g, "ng_float_array_push(");
+        } else if (at == TYPE_FLOAT2_ARRAY) {
+          emit(g, "ng_float2_array_push(");
         } else if (at == TYPE_BOOL_ARRAY) {
           emit(g, "ng_bool_array_push(");
-        } else {
+        } else if (at == TYPE_BOOL2_ARRAY) {
+          emit(g, "ng_bool2_array_push(");
+        } else if (at == TYPE_STRING_ARRAY) {
           emit(g, "ng_string_array_push(");
+        } else {
+          emit(g, "ng_string2_array_push(");
         }
         emit_expr(g, e->as.call.args[0]);
         emit(g, ", ");
@@ -290,10 +315,16 @@ static void emit_expr(CGen *g, Expr *e) {
           emit(g, "ng_int2_array_pop(");
         } else if (at == TYPE_FLOAT_ARRAY) {
           emit(g, "ng_float_array_pop(");
+        } else if (at == TYPE_FLOAT2_ARRAY) {
+          emit(g, "ng_float2_array_pop(");
         } else if (at == TYPE_BOOL_ARRAY) {
           emit(g, "ng_bool_array_pop(");
-        } else {
+        } else if (at == TYPE_BOOL2_ARRAY) {
+          emit(g, "ng_bool2_array_pop(");
+        } else if (at == TYPE_STRING_ARRAY) {
           emit(g, "ng_string_array_pop(");
+        } else {
+          emit(g, "ng_string2_array_pop(");
         }
         emit_expr(g, e->as.call.args[0]);
         emit(g, ")");
@@ -396,10 +427,16 @@ static void emit_for_clause_stmt(CGen *g, Stmt *st) {
         emit(g, "ng_int2_array_set(&");
       } else if (st->as.index_assign.target->inferred_type == TYPE_FLOAT_ARRAY) {
         emit(g, "ng_float_array_set(&");
+      } else if (st->as.index_assign.target->inferred_type == TYPE_FLOAT2_ARRAY) {
+        emit(g, "ng_float2_array_set(&");
       } else if (st->as.index_assign.target->inferred_type == TYPE_BOOL_ARRAY) {
         emit(g, "ng_bool_array_set(&");
-      } else {
+      } else if (st->as.index_assign.target->inferred_type == TYPE_BOOL2_ARRAY) {
+        emit(g, "ng_bool2_array_set(&");
+      } else if (st->as.index_assign.target->inferred_type == TYPE_STRING_ARRAY) {
         emit(g, "ng_string_array_set(&");
+      } else {
+        emit(g, "ng_string2_array_set(&");
       }
       emit(g, st->as.index_assign.target->as.ident_name);
       emit(g, ", (int64_t)(");

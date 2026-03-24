@@ -48,8 +48,11 @@ const char *type_kind_name(TypeKind t) {
     case TYPE_INT_ARRAY: return "int[]";
     case TYPE_INT2_ARRAY: return "int[][]";
     case TYPE_FLOAT_ARRAY: return "float[]";
+    case TYPE_FLOAT2_ARRAY: return "float[][]";
     case TYPE_BOOL_ARRAY: return "bool[]";
+    case TYPE_BOOL2_ARRAY: return "bool[][]";
     case TYPE_STRING_ARRAY: return "string[]";
+    case TYPE_STRING2_ARRAY: return "string[][]";
     case TYPE_VOID: return "void";
     default: return "<unknown>";
   }
@@ -61,7 +64,8 @@ static int type_eq(TypeKind a, TypeKind b) { return a == b; }
 
 static int type_is_array(TypeKind t) {
   return t == TYPE_INT_ARRAY || t == TYPE_INT2_ARRAY || t == TYPE_FLOAT_ARRAY ||
-         t == TYPE_BOOL_ARRAY || t == TYPE_STRING_ARRAY;
+         t == TYPE_FLOAT2_ARRAY || t == TYPE_BOOL_ARRAY || t == TYPE_BOOL2_ARRAY ||
+         t == TYPE_STRING_ARRAY || t == TYPE_STRING2_ARRAY;
 }
 
 static TypeKind array_of_scalar(TypeKind t) {
@@ -79,14 +83,20 @@ static TypeKind array_elem_type(TypeKind t) {
     case TYPE_INT_ARRAY: return TYPE_INT;
     case TYPE_INT2_ARRAY: return TYPE_INT_ARRAY;
     case TYPE_FLOAT_ARRAY: return TYPE_FLOAT;
+    case TYPE_FLOAT2_ARRAY: return TYPE_FLOAT_ARRAY;
     case TYPE_BOOL_ARRAY: return TYPE_BOOL;
+    case TYPE_BOOL2_ARRAY: return TYPE_BOOL_ARRAY;
     case TYPE_STRING_ARRAY: return TYPE_STRING;
+    case TYPE_STRING2_ARRAY: return TYPE_STRING_ARRAY;
     default: return TYPE_VOID;
   }
 }
 
 static TypeKind array_of_elem(TypeKind t) {
   if (t == TYPE_INT_ARRAY) return TYPE_INT2_ARRAY;
+  if (t == TYPE_FLOAT_ARRAY) return TYPE_FLOAT2_ARRAY;
+  if (t == TYPE_BOOL_ARRAY) return TYPE_BOOL2_ARRAY;
+  if (t == TYPE_STRING_ARRAY) return TYPE_STRING2_ARRAY;
   return array_of_scalar(t);
 }
 

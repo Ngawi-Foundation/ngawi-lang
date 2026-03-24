@@ -133,6 +133,10 @@ static TypeKind parse_type(Parser *p) {
   if (match(p, TOK_KW_FLOAT) || match(p, TOK_KW_RUSDI)) {
     if (match(p, TOK_LBRACKET)) {
       consume(p, TOK_RBRACKET, "expected ']' in array type");
+      if (match(p, TOK_LBRACKET)) {
+        consume(p, TOK_RBRACKET, "expected ']' in nested array type");
+        return TYPE_FLOAT2_ARRAY;
+      }
       return TYPE_FLOAT_ARRAY;
     }
     return TYPE_FLOAT;
@@ -140,6 +144,10 @@ static TypeKind parse_type(Parser *p) {
   if (match(p, TOK_KW_BOOL) || match(p, TOK_KW_FUAD)) {
     if (match(p, TOK_LBRACKET)) {
       consume(p, TOK_RBRACKET, "expected ']' in array type");
+      if (match(p, TOK_LBRACKET)) {
+        consume(p, TOK_RBRACKET, "expected ']' in nested array type");
+        return TYPE_BOOL2_ARRAY;
+      }
       return TYPE_BOOL_ARRAY;
     }
     return TYPE_BOOL;
@@ -147,6 +155,10 @@ static TypeKind parse_type(Parser *p) {
   if (match(p, TOK_KW_STRING) || match(p, TOK_KW_IMUT)) {
     if (match(p, TOK_LBRACKET)) {
       consume(p, TOK_RBRACKET, "expected ']' in array type");
+      if (match(p, TOK_LBRACKET)) {
+        consume(p, TOK_RBRACKET, "expected ']' in nested array type");
+        return TYPE_STRING2_ARRAY;
+      }
       return TYPE_STRING_ARRAY;
     }
     return TYPE_STRING;

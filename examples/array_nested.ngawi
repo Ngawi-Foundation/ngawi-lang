@@ -3,13 +3,23 @@ fn main() -> amba {
   muwani b: amba[] = [3, 4, 5];
   muwani m: amba[][] = [a, b];
 
+  muwani ff: rusdi[][] = [[1.5], [2.5, 3.5]];
+  muwani bb: fuad[][] = [[true], [false, true]];
+  muwani ss: imut[][] = [["x"], ["y", "z"]];
+
   m = push(m, [7, 8]);
   m[0] = [9, 10];
+  ff = push(ff, [4.5]);
+  bb = pop(bb);
+  ss = push(ss, ["k"]);
 
   muwani row: amba[] = m[0];
   muwani x: amba = row[1];
   muwani y: amba = m[1][2];
+  muwani f: rusdi = ff[1][1];
+  muwani q: fuad = bb[0][0];
+  muwani t: imut = ss[2][0];
 
-  print(x, y, len(m));
+  print(x, y, f, q, t, len(m));
   return 0;
 }

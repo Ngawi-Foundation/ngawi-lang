@@ -83,11 +83,23 @@ double ng_float_array_get(ng_float_array_t arr, int64_t index) {
   return arr.data[ng_array_checked_index(index, arr.len)];
 }
 
+ng_float_array_t ng_float2_array_get(ng_float2_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
 bool ng_bool_array_get(ng_bool_array_t arr, int64_t index) {
   return arr.data[ng_array_checked_index(index, arr.len)];
 }
 
+ng_bool_array_t ng_bool2_array_get(ng_bool2_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
 const char *ng_string_array_get(ng_string_array_t arr, int64_t index) {
+  return arr.data[ng_array_checked_index(index, arr.len)];
+}
+
+ng_string_array_t ng_string2_array_get(ng_string2_array_t arr, int64_t index) {
   return arr.data[ng_array_checked_index(index, arr.len)];
 }
 
@@ -103,11 +115,23 @@ void ng_float_array_set(ng_float_array_t *arr, int64_t index, double value) {
   arr->data[ng_array_checked_index(index, arr->len)] = value;
 }
 
+void ng_float2_array_set(ng_float2_array_t *arr, int64_t index, ng_float_array_t value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
 void ng_bool_array_set(ng_bool_array_t *arr, int64_t index, bool value) {
   arr->data[ng_array_checked_index(index, arr->len)] = value;
 }
 
+void ng_bool2_array_set(ng_bool2_array_t *arr, int64_t index, ng_bool_array_t value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
 void ng_string_array_set(ng_string_array_t *arr, int64_t index, const char *value) {
+  arr->data[ng_array_checked_index(index, arr->len)] = value;
+}
+
+void ng_string2_array_set(ng_string2_array_t *arr, int64_t index, ng_string_array_t value) {
   arr->data[ng_array_checked_index(index, arr->len)] = value;
 }
 
@@ -180,6 +204,29 @@ ng_float_array_t ng_float_array_pop(ng_float_array_t arr) {
   return r;
 }
 
+ng_float2_array_t ng_float2_array_push(ng_float2_array_t arr, ng_float_array_t value) {
+  int64_t new_len = arr.len + 1;
+  ng_float_array_t *out = (ng_float_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_float_array_t));
+  if (!out) return arr;
+  if (arr.len > 0 && arr.data) memcpy(out, arr.data, (size_t)arr.len * sizeof(ng_float_array_t));
+  out[new_len - 1] = value;
+  ng_float2_array_t r = {out, new_len};
+  return r;
+}
+
+ng_float2_array_t ng_float2_array_pop(ng_float2_array_t arr) {
+  if (arr.len <= 1 || !arr.data) {
+    ng_float2_array_t r = {NULL, 0};
+    return r;
+  }
+  int64_t new_len = arr.len - 1;
+  ng_float_array_t *out = (ng_float_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_float_array_t));
+  if (!out) return arr;
+  memcpy(out, arr.data, (size_t)new_len * sizeof(ng_float_array_t));
+  ng_float2_array_t r = {out, new_len};
+  return r;
+}
+
 ng_bool_array_t ng_bool_array_push(ng_bool_array_t arr, bool value) {
   int64_t new_len = arr.len + 1;
   bool *out = (bool *)ng_runtime_alloc((size_t)new_len * sizeof(bool));
@@ -203,6 +250,29 @@ ng_bool_array_t ng_bool_array_pop(ng_bool_array_t arr) {
   return r;
 }
 
+ng_bool2_array_t ng_bool2_array_push(ng_bool2_array_t arr, ng_bool_array_t value) {
+  int64_t new_len = arr.len + 1;
+  ng_bool_array_t *out = (ng_bool_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_bool_array_t));
+  if (!out) return arr;
+  if (arr.len > 0 && arr.data) memcpy(out, arr.data, (size_t)arr.len * sizeof(ng_bool_array_t));
+  out[new_len - 1] = value;
+  ng_bool2_array_t r = {out, new_len};
+  return r;
+}
+
+ng_bool2_array_t ng_bool2_array_pop(ng_bool2_array_t arr) {
+  if (arr.len <= 1 || !arr.data) {
+    ng_bool2_array_t r = {NULL, 0};
+    return r;
+  }
+  int64_t new_len = arr.len - 1;
+  ng_bool_array_t *out = (ng_bool_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_bool_array_t));
+  if (!out) return arr;
+  memcpy(out, arr.data, (size_t)new_len * sizeof(ng_bool_array_t));
+  ng_bool2_array_t r = {out, new_len};
+  return r;
+}
+
 ng_string_array_t ng_string_array_push(ng_string_array_t arr, const char *value) {
   int64_t new_len = arr.len + 1;
   const char **out = (const char **)ng_runtime_alloc((size_t)new_len * sizeof(const char *));
@@ -223,6 +293,32 @@ ng_string_array_t ng_string_array_pop(ng_string_array_t arr) {
   if (!out) return arr;
   memcpy(out, arr.data, (size_t)new_len * sizeof(const char *));
   ng_string_array_t r = {out, new_len};
+  return r;
+}
+
+ng_string2_array_t ng_string2_array_push(ng_string2_array_t arr, ng_string_array_t value) {
+  int64_t new_len = arr.len + 1;
+  ng_string_array_t *out =
+      (ng_string_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_string_array_t));
+  if (!out) return arr;
+  if (arr.len > 0 && arr.data)
+    memcpy(out, arr.data, (size_t)arr.len * sizeof(ng_string_array_t));
+  out[new_len - 1] = value;
+  ng_string2_array_t r = {out, new_len};
+  return r;
+}
+
+ng_string2_array_t ng_string2_array_pop(ng_string2_array_t arr) {
+  if (arr.len <= 1 || !arr.data) {
+    ng_string2_array_t r = {NULL, 0};
+    return r;
+  }
+  int64_t new_len = arr.len - 1;
+  ng_string_array_t *out =
+      (ng_string_array_t *)ng_runtime_alloc((size_t)new_len * sizeof(ng_string_array_t));
+  if (!out) return arr;
+  memcpy(out, arr.data, (size_t)new_len * sizeof(ng_string_array_t));
+  ng_string2_array_t r = {out, new_len};
   return r;
 }
 
