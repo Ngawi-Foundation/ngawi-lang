@@ -176,9 +176,11 @@ static void emit_expr(CGen *g, Expr *e) {
     case EXPR_INDEX:
       emit(g, "((");
       emit_expr(g, e->as.index.target);
-      emit(g, ").data[");
+      emit(g, ").data[ng_array_checked_index((int64_t)(");
       emit_expr(g, e->as.index.index);
-      emit(g, "])");
+      emit(g, "), ((");
+      emit_expr(g, e->as.index.target);
+      emit(g, ").len))])");
       break;
     case EXPR_UNARY:
       emit(g, "(");
@@ -247,6 +249,38 @@ static void emit_expr(CGen *g, Expr *e) {
           emit_expr(g, arg);
           emit(g, ")");
         }
+        break;
+      }
+      if (strcmp(e->as.call.name, "push") == 0 && e->as.call.arg_count == 2) {
+        TypeKind at = e->as.call.args[0]->inferred_type;
+        if (at == TYPE_INT_ARRAY) {
+          emit(g, "ng_int_array_push(");
+        } else if (at == TYPE_FLOAT_ARRAY) {
+          emit(g, "ng_float_array_push(");
+        } else if (at == TYPE_BOOL_ARRAY) {
+          emit(g, "ng_bool_array_push(");
+        } else {
+          emit(g, "ng_string_array_push(");
+        }
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, ", ");
+        emit_expr(g, e->as.call.args[1]);
+        emit(g, ")");
+        break;
+      }
+      if (strcmp(e->as.call.name, "pop") == 0 && e->as.call.arg_count == 1) {
+        TypeKind at = e->as.call.args[0]->inferred_type;
+        if (at == TYPE_INT_ARRAY) {
+          emit(g, "ng_int_array_pop(");
+        } else if (at == TYPE_FLOAT_ARRAY) {
+          emit(g, "ng_float_array_pop(");
+        } else if (at == TYPE_BOOL_ARRAY) {
+          emit(g, "ng_bool_array_pop(");
+        } else {
+          emit(g, "ng_string_array_pop(");
+        }
+        emit_expr(g, e->as.call.args[0]);
+        emit(g, ")");
         break;
       }
       if (strcmp(e->as.call.name, "contains") == 0 && e->as.call.arg_count == 2) {
@@ -338,9 +372,11 @@ static void emit_for_clause_stmt(CGen *g, Stmt *st) {
     case STMT_INDEX_ASSIGN:
       emit(g, "(");
       emit_expr(g, st->as.index_assign.target);
-      emit(g, ").data[");
+      emit(g, ").data[ng_array_checked_index((int64_t)(");
       emit_expr(g, st->as.index_assign.index);
-      emit(g, "] = ");
+      emit(g, "), ((");
+      emit_expr(g, st->as.index_assign.target);
+      emit(g, ").len))] = ");
       emit_expr(g, st->as.index_assign.value);
       break;
 
@@ -383,9 +419,11 @@ static void emit_stmt(CGen *g, Stmt *st) {
       emit_indent(g);
       emit(g, "(");
       emit_expr(g, st->as.index_assign.target);
-      emit(g, ").data[");
+      emit(g, ").data[ng_array_checked_index((int64_t)(");
       emit_expr(g, st->as.index_assign.index);
-      emit(g, "] = ");
+      emit(g, "), ((");
+      emit_expr(g, st->as.index_assign.target);
+      emit(g, ").len))] = ");
       emit_expr(g, st->as.index_assign.value);
       emit(g, ";\n");
       break;

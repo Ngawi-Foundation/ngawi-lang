@@ -334,6 +334,42 @@ static TypeKind check_call(Sema *s, Expr *e) {
     return set_expr_type(e, TYPE_INT);
   }
 
+  if (strcmp(e->as.call.name, "push") == 0) {
+    if (e->as.call.arg_count != 2) {
+      sema_error(s, e->line, e->col, "push expects 2 arguments, got %zu", e->as.call.arg_count);
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind at = check_expr(s, e->as.call.args[0]);
+    TypeKind vt = check_expr(s, e->as.call.args[1]);
+    if (at == TYPE_VOID || vt == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
+    if (!type_is_array(at)) {
+      sema_error(s, e->line, e->col, "push expects array as first argument, got '%s'",
+                 type_kind_name(at));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind elem = array_elem_type(at);
+    if (!type_eq(elem, vt)) {
+      sema_error(s, e->line, e->col, "push on '%s' expects value '%s', got '%s'",
+                 type_kind_name(at), type_kind_name(elem), type_kind_name(vt));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    return set_expr_type(e, at);
+  }
+
+  if (strcmp(e->as.call.name, "pop") == 0) {
+    if (e->as.call.arg_count != 1) {
+      sema_error(s, e->line, e->col, "pop expects 1 argument, got %zu", e->as.call.arg_count);
+      return set_expr_type(e, TYPE_VOID);
+    }
+    TypeKind at = check_expr(s, e->as.call.args[0]);
+    if (at == TYPE_VOID) return set_expr_type(e, TYPE_VOID);
+    if (!type_is_array(at)) {
+      sema_error(s, e->line, e->col, "pop expects array, got '%s'", type_kind_name(at));
+      return set_expr_type(e, TYPE_VOID);
+    }
+    return set_expr_type(e, at);
+  }
+
   if (strcmp(e->as.call.name, "contains") == 0) {
     if (e->as.call.arg_count != 2) {
       sema_error(s, e->line, e->col, "contains expects 2 arguments, got %zu",

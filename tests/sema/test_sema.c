@@ -438,11 +438,14 @@ static void test_array_mvp(void) {
       "  let f: float[] = [1.5, 2.5];\n"
       "  let b: bool[] = [true, false];\n"
       "  let s: string[] = [\"a\", \"b\"];\n"
+      "  a = push(a, 4);\n"
+      "  a = pop(a);\n"
+      "  s = push(s, \"c\");\n"
       "  a[1] = 99;\n"
       "  let x: int = a[1];\n"
       "  let y: float = f[0];\n"
       "  let z: bool = b[1];\n"
-      "  let t: string = s[1];\n"
+      "  let t: string = s[2];\n"
       "  let n: int = len(a);\n"
       "  print(x, y, z, t, n);\n"
       "  return 0;\n"
@@ -457,6 +460,13 @@ static void test_array_mvp(void) {
   const char *bad_mixed_src =
       "fn main() -> int {\n"
       "  let f: float[] = [1.0, 2];\n"
+      "  return 0;\n"
+      "}\n";
+
+  const char *bad_push_src =
+      "fn main() -> int {\n"
+      "  let b: bool[] = [true];\n"
+      "  b = push(b, 1);\n"
       "  return 0;\n"
       "}\n";
 
@@ -494,6 +504,8 @@ static void test_array_mvp(void) {
          "int array with non-int element should fail");
   expect(run_program("array_bad_mixed.ngawi", bad_mixed_src, 1) != 0,
          "float array with int element should fail");
+  expect(run_program("array_bad_push.ngawi", bad_push_src, 1) != 0,
+         "push should enforce element type");
   expect(run_program("array_bad_index.ngawi", bad_index_src, 1) != 0,
          "array index must be int");
   expect(run_program("array_bad_write.ngawi", bad_write_src, 1) != 0,

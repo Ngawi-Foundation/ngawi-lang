@@ -24,6 +24,16 @@ typedef struct ng_string_array_t {
   int64_t len;
 } ng_string_array_t;
 
+int64_t ng_array_checked_index(int64_t index, int64_t len);
+ng_int_array_t ng_int_array_push(ng_int_array_t arr, int64_t value);
+ng_int_array_t ng_int_array_pop(ng_int_array_t arr);
+ng_float_array_t ng_float_array_push(ng_float_array_t arr, double value);
+ng_float_array_t ng_float_array_pop(ng_float_array_t arr);
+ng_bool_array_t ng_bool_array_push(ng_bool_array_t arr, bool value);
+ng_bool_array_t ng_bool_array_pop(ng_bool_array_t arr);
+ng_string_array_t ng_string_array_push(ng_string_array_t arr, const char *value);
+ng_string_array_t ng_string_array_pop(ng_string_array_t arr);
+
 void ng_print_int(int64_t v);
 void ng_print_float(double v);
 void ng_print_bool(bool v);

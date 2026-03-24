@@ -677,6 +677,14 @@ static Stmt *parse_statement(Parser *p) {
   if (check(p, TOK_KW_WHILE)) return parse_while(p);
   if (check(p, TOK_KW_FOR)) return parse_for(p);
   if (check(p, TOK_KW_MATCH)) return parse_match(p);
+  if (check(p, TOK_KW_IMPORT)) {
+    Token kw = p->cur;
+    parse_error(p, "'import' is only allowed at top-level");
+    advance(p);
+    if (check(p, TOK_STRING_LIT)) advance(p);
+    if (check(p, TOK_SEMI)) advance(p);
+    return new_stmt(STMT_BLOCK, kw.line, kw.col);
+  }
 
   if (check(p, TOK_KW_LET) || check(p, TOK_KW_CONST)) {
     int is_const = check(p, TOK_KW_CONST);

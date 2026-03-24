@@ -4,12 +4,16 @@ fn main() -> amba {
   muwani b: fuad[] = [true, false];
   muwani s: imut[] = ["aa", "bb"];
 
+  a = push(a, 40);
+  a = pop(a);
+  s = push(s, "cc");
+
   a[1] = 99;
 
   muwani x: amba = a[1];
   muwani y: rusdi = f[0];
   muwani z: fuad = b[1];
-  muwani t: imut = s[1];
+  muwani t: imut = s[2];
   muwani n: amba = len(a);
 
   print(x, y, z, t, n);
