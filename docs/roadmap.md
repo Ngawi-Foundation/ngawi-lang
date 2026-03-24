@@ -10,7 +10,7 @@ This roadmap tracks near-term language work.
 
 ## Planned language features
 
-- arrays
+- array expansion beyond `int[]` MVP
 - structs
 - pattern guards for `match` (evaluation)
 - optional semicolon mode (evaluation)

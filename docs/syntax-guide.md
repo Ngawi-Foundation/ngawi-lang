@@ -106,6 +106,16 @@ i++;
 i--;
 ```
 
+## Arrays (MVP)
+
+```ngawi
+let a: int[] = [1, 2, 3];
+let x: int = a[1];
+let n: int = len(a);
+```
+
+Current MVP supports `int[]` only.
+
 ## Operators
 
 - Arithmetic: `+ - * / %`

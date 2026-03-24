@@ -54,12 +54,13 @@ Ngawi keeps base names and aliases active at the same time.
 
 ## 4. Types
 
-Ngawi currently supports five builtin types:
+Ngawi currently supports builtin scalar types plus one array MVP type:
 
 - `int`
 - `float`
 - `bool`
 - `string`
+- `int[]` (MVP)
 - `void`
 
 Backend mapping to C11:
@@ -196,6 +197,7 @@ Rules:
 ### 9.3 string helpers
 
 - `len(s) -> int`
+  - accepts `string` and `int[]`
 - `contains(s, sub) -> bool`
 - `starts_with(s, prefix) -> bool`
 - `ends_with(s, suffix) -> bool`
