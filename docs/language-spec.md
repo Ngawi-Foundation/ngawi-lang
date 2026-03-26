@@ -236,11 +236,17 @@ The parser and sema use error caps to reduce cascade noise.
 
 Not implemented yet:
 
-- arrays
 - structs
 - generics
 - classes
 - optimizer passes
+
+Current array status (implemented in MVP):
+
+- scalar arrays: `int[]`, `float[]`, `bool[]`, `string[]`
+- nested scalar arrays (2D MVP): `int[][]`, `float[][]`, `bool[][]`, `string[][]`
+- runtime bounds checks for indexed access
+- `push`/`pop` builtins for scalar arrays
 
 ## 12. Imports
 
